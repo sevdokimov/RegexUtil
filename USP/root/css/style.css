@@ -1,0 +1,57 @@
+
+body {
+    margin:30px 15px 0 15px;
+    /*font-family: sans-serif;*/
+}
+
+#tBar {
+    margin:0 0 20px 0;
+    border-bottom: solid 1px #36638E;
+}
+
+#tBar .out {
+    float:left;
+    margin:0 10px;
+    WIDTH: 170px
+}
+
+#tBar .in {
+    border: solid 1px black;
+    padding:3px 7px;
+    font-weight:bold;
+    text-align: center;
+}
+
+#tBar a {
+    color: #2B587A;
+    font-size:18px;
+    text-decoration: none;
+    cursor:pointer;
+}
+
+
+#tBar a:hover .in {
+    background:#ececec;
+}
+
+#features {
+    color:#343;
+}
+
+#features li {
+    padding:3px 0;
+}
+
+.regex {
+    font-size:14px;
+    /*border:1px inset black;*/
+    padding:2px;
+}
+
+.examples h4 {
+    margin-bottom:7px;
+}
+
+#rt td {
+    vertical-align:top;
+}

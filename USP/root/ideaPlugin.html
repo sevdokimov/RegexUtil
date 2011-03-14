@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>Idea Regular Expression (RegExp) Plugin</title>
+    <link href="css/style.css" type="text/css" rel="stylesheet">
+    <meta name="Description"
+          content="IDEA plugin for regular expression testing. Full highlighting of regexp syntax.">
+    <meta name="keywords"
+          content="regex, regexp, regular expression, idea plugin, java regex, developement, javascript, php">
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery.corner.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/regex.js"></script>
+    <script type="text/javascript" src="js/eclipsePluginRegH.js"></script>
+</head>
+
+<body>
+
+<div id="tBar">
+    <div class="out" style="margin-left:30px">
+        <a href="./">
+            <div class="in">Online regex tester</div>
+        </a>
+    </div>
+    <div class="out">
+        <a href="eclipsePlugin.html">
+            <div class="in">Eclipse Plugin</div>
+        </a>
+    </div>
+    <div class="out">
+        <a href="ideaPlugin.html">
+            <div class="in actLink">IDEA Plugin</div>
+        </a>
+    </div>
+    <div class="out">
+        <a href="examples.html">
+            <div class="in">Regex Examples</div>
+        </a>
+    </div>
+    <div style="clear:both"></div>
+</div>
+<script type="text/javascript">$("#tBar div.in").corner("top 5px")</script>
+
+<table id="rt" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td>
+
+<h2>IntelliJ Idea plugin for testing/editing regular expressions flavor of the Sun Java standard API (java.util.regex).</h2>
+
+<div style="margin:10px 0 5px 0;color:#666">
+    Screenshot:
+</div>
+<img src="images/ideaPlugin.PNG" alt="Screenshot of idea plugin">
+
+<h3>Download the plugin</h3>
+Last version (1.0.0): <a href="downloads/ideaPlugin/RegexTester.zip" type="">Download</a>
+    
+<h3>Features</h3>
+
+<!--<span style="font-size:12px;color:#888;font-weight:normal;">(Move mouse to "<img src="images/win.PNG">" to see a screenshot.)</span>-->
+
+<ul id="features">
+
+    <li>
+        Full highlighting of regular expression syntax for an easy visual clue<br>
+        (including bracket matching <img popup="matchBrack1_a.PNG" src="images/win.PNG" alt="">, <img
+            popup="matchBrack2_a.PNG" src="images/win.PNG" alt="">;
+        error detecting <img popup="error1_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="error2_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="error3_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="error4_a.PNG" src="images/win.PNG" alt="">)
+    </li>
+
+    <li>
+        Tooltips will be shown when the mouse is over a part of the regex.
+        <img popup="tooltip1_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="tooltip2_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="tooltip3_a.PNG" src="images/win.PNG" alt="">,
+        <img popup="tooltip4_a.PNG" src="images/win.PNG" alt="">
+    </li>
+
+    <li>
+        Evaluates your regular expression while you are typing;
+    </li>
+
+    <li>
+        4 distinct match modes:
+        <ul>
+            <li>Find a sequence of characters <img popup="find_a.PNG" src="images/win.PNG" alt="">;</li>
+            <li>Match a complete text <img popup="match1_a.PNG" src="images/win.PNG" alt="">, <img popup="match2_a.PNG"
+                                                                                                   src="images/win.PNG"
+                                                                                                   alt="">;
+            </li>
+            <li>Split text (see java.lang.String.split(String regex)) <img popup="split_a.PNG" src="images/win.PNG"
+                                                                           alt="">;
+            </li>
+            <li>Replace <img popup="replace_a.PNG" src="images/win.PNG" alt="">;</li>
+        </ul>
+    </li>
+
+    <li>Support for pattern flags (e.g. Pattern.CASE_INSENSITIVE, Pattern.DOTALL, ...);</li>
+
+    <li>Generation of java source string literals based on the regexp, (escape slash, e.g. "\(x\)" becomes "\\(x\\)")
+    </li>
+
+    <li>
+        Synchronized selection of regular expression and text:
+        Just select part of the regexp to see which part of the text is matched by this part.
+        <img popup="select_a.PNG" src="images/win.PNG" alt="">.
+    </li>
+
+</ul>
+<div style="padding-left:25px">
+    Functionality of this plugin is available as <a href="applet.html">java-applet</a>
+</div>
+
+
+<h3>Demo of Regular Expression Hilighting</h3>
+
+<div style="padding:0 0 0 20px">
+
+    <span style="font-size:14px;color:#555">Move mouse to regex to see example of tooltips and brackets matching</span>
+
+    <div style="background-image:url('images/ideaPluginLive.PNG');width:839px;height:96px;background-repeat:no-repeat;margin-top:3px">
+        <div id="exampleRegex" style="position:relative;top:55px;left:15px;width:550px;font-size:14px"></div>
+    </div>
+
+
+</div>
+
+<h3>License</h3>
+This programm is free and is distributed under the GPL. All funds for developement come from advertisement on this page.
+
+<h3>Feedback</h3>
+You may submit bug reports or requests to <a href="mailto:sergey.evdokimov85@gmail.com">sergey.evdokimov85@gmail.com</a>
+
+    <br><br><br><br>
+    
+</td>
+<td align="center">
+<script type="text/javascript">
+google_ad_client = "pub-9077233705776207";
+/* vertRight */
+google_ad_slot = "7562375960";
+google_ad_width = 160;
+google_ad_height = 600;
+//
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+    
+<div style="margin-top:10px">
+    <a href="http://sourceforge.net/donate/index.php?group_id=202567"><img src="http://images.sourceforge.net/images/project-support.jpg" width="88" height="32" border="0" alt="Support This Project" /> </a>
+</div>
+
+</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+    $('[popup]').each(function() {
+        attachPopup(this, $('<img src="images/' + this.getAttribute('popup') + '" alt="">'))
+    })
+
+    hilightRegex($('#exampleRegex'), epExampleRegex)
+</script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-4814721-1");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+</body>
+
+</html>
