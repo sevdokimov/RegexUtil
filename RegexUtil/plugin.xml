@@ -24,7 +24,7 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.TaskList"
                relationship="right"
-               id="ru.ess.regexutil.views.RegexView">
+               id="com.ess.regexutil.views.RegexView">
          </view>
       </perspectiveExtension>
    </extension>
