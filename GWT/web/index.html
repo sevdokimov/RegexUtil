@@ -15,7 +15,7 @@
 
 <div id="tBar">
     <div class="out" style="margin-left:30px">
-        <a href="./"><div class="in actLink">Online regex tester</div></a>
+        <a href="../../USP/root"><div class="in actLink">Online regex tester</div></a>
     </div>
     <div class="out">
         <a href="eclipsePlugin.html"><div class="in">Eclipse Plugin</div></a>
@@ -30,6 +30,11 @@
 <script type="text/javascript">$("#tBar div.in").corner("top 5px")</script>
 
 <h2>Regexp Editor</h2>
+
+<div style="color:red;">
+    Since java 1.6.0_24 unsigned applets don't have access to system clipboard.
+    You can go to <a href="signedJar.html">page with signed applet</a>
+</div>
 
 <div style="float:right;color:#888;font-size:12px">
     Java-applet that helps you test regular expressions flavor of the Sun Java standard API (java.util.regex)
@@ -62,7 +67,7 @@
 
     var comment = '<div style="color:red;font-size:18px;width:600px;display:none;margin:40px 0">Your browser cannot run java-applet. Possibe Java Virtual Machine is not installed on your computer, you can install it from <a href="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads</a></div>'
     if ($.browser.msie) {
-        document.write('<object name=JA classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" codebase="http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=1,5,0,0" WIDTH="100%" HEIGHT="470px"><PARAM NAME=CODE VALUE="com.ess.regexutil.applet.RegexApplet"><PARAM NAME=ARCHIVE VALUE="s_regexApplet.jar"><param name="type" value="application/x-java-applet;version=1.5"><param name="scriptable" value="false"><PARAM NAME="MAYSCRIPT" VALUE="true">')
+        document.write('<object name=JA classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" codebase="http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=1,5,0,0" WIDTH="100%" HEIGHT="470px"><PARAM NAME=CODE VALUE="com.ess.regexutil.applet.RegexApplet"><PARAM NAME=ARCHIVE VALUE="regexApplet.jar"><param name="type" value="application/x-java-applet;version=1.5"><param name="scriptable" value="false"><PARAM NAME="MAYSCRIPT" VALUE="true">')
         for (var i = 0; i < paramVal.length; i++) {
             document.write('<param name="' + paramVal[i].name + '" value="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '">')
         }
@@ -70,7 +75,7 @@
         document.write(comment)
         document.write('</comment></object>')
     } else {
-        document.write('<embed type="application/x-java-applet;version=1.5"CODE="com.ess.regexutil.applet.RegexApplet"ARCHIVE="s_regexApplet.jar"WIDTH="100%"HEIGHT="470px"scriptable="false"MAYSCRIPT="true"name="JA"pluginspage="http://java.sun.com/j2se/1.5.0/download.html"')
+        document.write('<embed type="application/x-java-applet;version=1.5"CODE="com.ess.regexutil.applet.RegexApplet"ARCHIVE="regexApplet.jar"WIDTH="100%"HEIGHT="470px"scriptable="false"MAYSCRIPT="true"name="JA"pluginspage="http://java.sun.com/j2se/1.5.0/download.html"')
         for (var i = 0; i < paramVal.length; i++) {
             document.write(paramVal[i].name + '="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '"')
         }
