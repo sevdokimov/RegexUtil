@@ -157,10 +157,11 @@ public class SwingAdapter implements ITextEditorAdapter {
 			}
 		});
 		editor.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
+            @Override
+            public void keyReleased(KeyEvent e) {
 				someChange();
-			}
+            }
+
 		});
 		editor.addMouseListener(new MouseAdapter() {
 			@Override
