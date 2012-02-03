@@ -17,8 +17,10 @@
 
   ]]></description>
 
-    <version>1.0.1</version>
+    <version>1.0.4</version>
     <vendor email="sergey.evdokimov85@gmail.com">Sergey Evdokimov</vendor>
+
+    <depends>com.intellij.modules.lang</depends>
     
     <project-components>
         <component>

@@ -6,6 +6,9 @@ import com.intellij.openapi.project.*;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.wm.*;
 import java.util.*;
+
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
 import org.jdom.*;
 import org.jetbrains.annotations.*;
 
@@ -35,7 +38,9 @@ public class RegexUtilComponent implements ProjectComponent, JDOMExternalizable 
 
     public void projectOpened() {
         ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-        toolWindowManager.registerToolWindow("Regex Tester", panel, ToolWindowAnchor.BOTTOM);
+        ToolWindow toolWindow = toolWindowManager.registerToolWindow("Regex Tester", true, ToolWindowAnchor.BOTTOM);
+        Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
+        toolWindow.getContentManager().addContent(content);
     }
 
     public void projectClosed() {
