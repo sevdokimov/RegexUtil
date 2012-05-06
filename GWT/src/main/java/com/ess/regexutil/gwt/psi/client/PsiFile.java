@@ -1,11 +1,13 @@
 package com.ess.regexutil.gwt.psi.client;
 
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
+
 /**
  * @author Sergey Evdokimov
  */
 public class PsiFile extends CompositePsiElement {
 
-  public static final int TYPE = counter++;
+  public static final IElementType TYPE = new IElementType("FILE");
 
   private final String text;
 
