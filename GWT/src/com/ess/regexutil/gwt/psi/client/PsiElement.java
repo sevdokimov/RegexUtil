@@ -1,5 +1,7 @@
 package com.ess.regexutil.gwt.psi.client;
 
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
+
 /**
  * @author Sergey Evdokimov
  */
@@ -13,9 +15,9 @@ public abstract class PsiElement {
 
   private int cachedIndex = -1;
 
-  protected final int type;
+  protected final IElementType type;
 
-  protected PsiElement(int type) {
+  protected PsiElement(IElementType type) {
     this.type = type;
   }
 
@@ -32,7 +34,7 @@ public abstract class PsiElement {
     return cachedIndex;
   }
 
-  public int getType() {
+  public IElementType getType() {
     return type;
   }
 

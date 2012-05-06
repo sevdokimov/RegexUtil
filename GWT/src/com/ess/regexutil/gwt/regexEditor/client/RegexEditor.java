@@ -1,6 +1,6 @@
 package com.ess.regexutil.gwt.regexEditor.client;
 
-import com.ess.regexutil.gwt.psi.client.lexer.TokenType;
+import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
 import com.ess.regexutil.gwt.regexEditor.client.lexer.RegexCapability;
 import com.ess.regexutil.gwt.regexEditor.client.lexer.RegexLexer;
 import com.google.gwt.core.client.EntryPoint;
@@ -15,49 +15,40 @@ import java.util.EnumSet;
  * @author Sergey Evdokimov
  */
 public class RegexEditor implements EntryPoint {
-    public void onModuleLoad() {
-        VerticalPanel panel = new VerticalPanel();
+  public void onModuleLoad() {
+    VerticalPanel panel = new VerticalPanel();
 
-        final TextBox regex = new TextBox();
-        panel.add(regex);
+    final TextBox regex = new TextBox();
+    panel.add(regex);
 
-        final RichTextArea textArea = new RichTextArea();
-        panel.add(textArea);
+    final RichTextArea textArea = new RichTextArea();
+    panel.add(textArea);
 
-        panel.add(new Button("Parse", new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                String regexText = regex.getText();
+    panel.add(new Button("Parse", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        String regexText = regex.getText();
 
 
-                RegexLexer lexer = new RegexLexer(EnumSet.of(RegexCapability.NESTED_CHARACTER_CLASSES));
-                lexer.start(regexText);
+        RegexLexer lexer = new RegexLexer(EnumSet.of(RegexCapability.NESTED_CHARACTER_CLASSES));
+        lexer.start(regexText);
 
-                StringBuilder text = new StringBuilder();
+        StringBuilder text = new StringBuilder();
 
-                while (true) {
-                    int tt = lexer.getTokenType();
 
-                    if (tt == 0) break;
+        text.append("<br><br>");
 
-                    text.append(lexer.getTokenText()).append(" : ").append(TokenType.description(lexer.getTokenType())).append("<br>");
+        try {
+          RegExp r = RegExp.compile(regexText);
+          text.append("Success");
+        }
+        catch (Exception e) {
+          text.append(e.getMessage());
+        }
 
-                    lexer.advance();
-                }
+        textArea.setHTML(text.toString());
+      }
+    }));
 
-                text.append("<br><br>");
-
-                try {
-                    RegExp r = RegExp.compile(regexText);
-                    text.append("Success");
-                } catch (Exception e) {
-                    text.append(e.getMessage());
-                }
-
-                textArea.setHTML(text.toString());
-            }
-        }));
-
-        RootPanel.get("slot1").add(panel);
-
-    }
+    RootPanel.get("slot1").add(panel);
+  }
 }

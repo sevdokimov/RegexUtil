@@ -22,7 +22,7 @@ import java.io.IOException;
  */
 public class FlexAdapter extends Lexer {
   private FlexLexer myFlex = null;
-  private int myTokenType = 0;
+  private IElementType myTokenType = null;
   private String myText;
 
   private int myEnd;
@@ -41,37 +41,37 @@ public class FlexAdapter extends Lexer {
     myText = buffer;
     myEnd = endOffset;
     myFlex.reset(myText, startOffset, endOffset, initialState);    
-    myTokenType = 0;
+    myTokenType = null;
   }
 
   @Override
   public int getState() {
-    if (myTokenType == 0) locateToken();
+    if (myTokenType == null) locateToken();
     return myState;
   }
 
   @Override
-  public int getTokenType() {
-    if (myTokenType == 0) locateToken();
+  public IElementType getTokenType() {
+    if (myTokenType == null) locateToken();
     return myTokenType;
   }
 
   @Override
   public int getTokenStart() {
-    if (myTokenType == 0) locateToken();
+    if (myTokenType == null) locateToken();
     return myFlex.getTokenStart();
   }
 
   @Override
   public int getTokenEnd() {
-    if (myTokenType == 0) locateToken();
+    if (myTokenType == null) locateToken();
     return myFlex.getTokenEnd();
   }
 
   @Override
   public void advance() {
-    if (myTokenType == 0) locateToken();
-    myTokenType = 0;
+    if (myTokenType == null) locateToken();
+    myTokenType = null;
   }
 
   @Override
@@ -85,7 +85,7 @@ public class FlexAdapter extends Lexer {
   }
 
   private void locateToken() {
-    if (myTokenType != 0) return;
+    if (myTokenType != null) return;
     try {
       myState = myFlex.yystate();
       myTokenType = myFlex.advance();

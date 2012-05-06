@@ -1,78 +1,67 @@
 package com.ess.regexutil.gwt.psi.client.lexer;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Sergey Evdokimov
  */
 public abstract class TokenSet {
 
-    public static final TokenSet EMPTY_TOKEN_SET = new TokenSet() {
-        @Override
-        public boolean contains(int element) {
-            return false;
-        }
+  public static final TokenSet EMPTY = new TokenSet() {
+    @Override
+    public boolean contains(IElementType element) {
+      return false;
+    }
 
-        @Override
-        public int[] getElements() {
-            return new int[0];
+    @Override
+    public IElementType[] getElements() {
+      return new IElementType[0];
+    }
+  };
+
+  public abstract boolean contains(IElementType element);
+
+  public abstract IElementType[] getElements();
+
+  public static TokenSet create(final IElementType... elements) {
+    return new TokenSet() {
+      private boolean[] m;
+
+      {
+        m = new boolean[IElementType.getMaxElementTypeIndex()];
+
+        for (IElementType element : elements) {
+          m[element.getIndex()] = true;
         }
+      }
+
+      @Override
+      public boolean contains(IElementType element) {
+        int index = element.getIndex();
+        return index < m.length && m[index];
+      }
+
+      @Override
+      public IElementType[] getElements() {
+        return elements;
+      }
     };
+  }
 
-    private int[] cachedElements;
+  // todo implement
+  //public static TokenSet create(int element);
 
-    public abstract boolean contains(int element);
+  public static TokenSet orSet(TokenSet... tokenSets) {
+    Set<IElementType> set = new HashSet<IElementType>();
 
-    public abstract int[] getElements();
-
-    public static TokenSet create(final int ... elements) {
-        return new TokenSet() {
-            private boolean[] m;
-
-            {
-                m = new boolean[TokenType.getTokenCounts()];
-
-                for (int element : elements) {
-                    m[element] = true;
-                }
-            }
-
-            @Override
-            public boolean contains(int element) {
-                return element < m.length && m[element];
-            }
-
-            @Override
-            public int[] getElements() {
-                return elements;
-            }
-
-        };
+    for (TokenSet tokenSet : tokenSets) {
+      Collections.addAll(set, tokenSet.getElements());
     }
 
-    // todo implement
-    //public static TokenSet create(int element);
+    IElementType[] allElements = set.toArray(new IElementType[set.size()]);
 
-    public static TokenSet orSet(TokenSet ... tokenSets) {
-        boolean[] m = new boolean[TokenType.getTokenCounts()];
-
-        int count = 0;
-
-        for (TokenSet tokenSet : tokenSets) {
-            for (int element : tokenSet.getElements()) {
-                if (!m[element]) {
-                    count++;
-                    m[element] = true;
-                }
-            }
-        }
-
-        int[] allElements = new int[count];
-        int k = 0;
-        for (int i = 1; i < m.length; i++) {
-            if (m[i]) {
-                allElements[k++] = i;
-            }
-        }
-
-        return create(allElements);
-    }
+    return create(allElements);
+  }
 }

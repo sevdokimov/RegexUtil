@@ -1,5 +1,7 @@
 package com.ess.regexutil.gwt.psi.client;
 
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
+
 /**
  * @author Sergey Evdokimov
  */
@@ -10,7 +12,7 @@ public class CompositePsiElement extends PsiElement {
 
   private int cachedLength = -1;
 
-  public CompositePsiElement(int type) {
+  public CompositePsiElement(IElementType type) {
     super(type);
   }
 

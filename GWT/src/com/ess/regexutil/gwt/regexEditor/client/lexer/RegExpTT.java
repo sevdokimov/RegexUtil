@@ -15,108 +15,109 @@
  */
 package com.ess.regexutil.gwt.regexEditor.client.lexer;
 
-import com.ess.regexutil.gwt.psi.client.lexer.TokenType;
+import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 
 public interface RegExpTT {
-    int NUMBER = TokenType.createToken("NUMBER");
-    int NAME = TokenType.createToken("NAME");
-    int COMMA = TokenType.createToken("COMMA");
+    IElementType NUMBER = new IElementType("NUMBER");
+    IElementType NAME = new IElementType("NAME");
+    IElementType COMMA = new IElementType("COMMA");
 
     // "\\Q"
-    int QUOTE_BEGIN = TokenType.createToken("QUOTE_BEGIN");
+    IElementType QUOTE_BEGIN = new IElementType("QUOTE_BEGIN");
     // <QUOTE> "\\E"
-    int QUOTE_END = TokenType.createToken("QUOTE_END");
+    IElementType QUOTE_END = new IElementType("QUOTE_END");
 
     // "\\" 0-9
-    int BACKREF = TokenType.createToken("BACKREF");
+    IElementType BACKREF = new IElementType("BACKREF");
 
-    int LBRACE = TokenType.createToken("LBRACE");
-    int RBRACE = TokenType.createToken("RBRACE");
+    IElementType LBRACE = new IElementType("LBRACE");
+    IElementType RBRACE = new IElementType("RBRACE");
 
-    int CLASS_BEGIN = TokenType.createToken("CLASS_BEGIN");
-    int CLASS_END = TokenType.createToken("CLASS_END");
-    int ANDAND = TokenType.createToken("ANDAND");
+    IElementType CLASS_BEGIN = new IElementType("CLASS_BEGIN");
+    IElementType CLASS_END = new IElementType("CLASS_END");
+    IElementType ANDAND = new IElementType("ANDAND");
 
-    int GROUP_BEGIN = TokenType.createToken("GROUP_BEGIN");
-    int GROUP_END = TokenType.createToken("GROUP_END");
+    IElementType GROUP_BEGIN = new IElementType("GROUP_BEGIN");
+    IElementType GROUP_END = new IElementType("GROUP_END");
 
-    int NON_CAPT_GROUP = TokenType.createToken("NON_CAPT_GROUP");
-    int POS_LOOKBEHIND = TokenType.createToken("POS_LOOKBEHIND");
-    int NEG_LOOKBEHIND = TokenType.createToken("NEG_LOOKBEHIND");
-    int POS_LOOKAHEAD = TokenType.createToken("POS_LOOKAHEAD");
-    int NEG_LOOKAHEAD = TokenType.createToken("NEG_LOOKAHEAD");
-    int SET_OPTIONS = TokenType.createToken("SET_OPTIONS");
+    IElementType NON_CAPT_GROUP = new IElementType("NON_CAPT_GROUP");
+    IElementType POS_LOOKBEHIND = new IElementType("POS_LOOKBEHIND");
+    IElementType NEG_LOOKBEHIND = new IElementType("NEG_LOOKBEHIND");
+    IElementType POS_LOOKAHEAD = new IElementType("POS_LOOKAHEAD");
+    IElementType NEG_LOOKAHEAD = new IElementType("NEG_LOOKAHEAD");
+    IElementType SET_OPTIONS = new IElementType("SET_OPTIONS");
 
-    int QUEST = TokenType.createToken("QUEST");
-    int STAR = TokenType.createToken("STAR");
-    int PLUS = TokenType.createToken("PLUS");
-    int COLON = TokenType.createToken("COLON");
+    IElementType QUEST = new IElementType("QUEST");
+    IElementType STAR = new IElementType("STAR");
+    IElementType PLUS = new IElementType("PLUS");
+    IElementType COLON = new IElementType("COLON");
 
     // "\\" ("b" | "B" | "A" | "z" | "Z" | "G")
-    int BOUNDARY = TokenType.createToken("BOUNDARY");
+    IElementType BOUNDARY = new IElementType("BOUNDARY");
     // "^"
-    int CARET = TokenType.createToken("CARET");
+    IElementType CARET = new IElementType("CARET");
     // "$"
-    int DOLLAR = TokenType.createToken("DOLLAR");
+    IElementType DOLLAR = new IElementType("DOLLAR");
 
-    int DOT = TokenType.createToken("DOT");
-    int UNION = TokenType.createToken("UNION");
+    IElementType DOT = new IElementType("DOT");
+    IElementType UNION = new IElementType("UNION");
 
     // > in Python/Ruby named group
-    int GT = TokenType.createToken("GT");
+    IElementType GT = new IElementType("GT");
     // ' in Ruby quoted named group
-    int QUOTE = TokenType.createToken("QUOTE");
+    IElementType QUOTE = new IElementType("QUOTE");
 
     // "\b" | "\t" | "\f" | "\r" | "\n"
-    int CTRL_CHARACTER = TokenType.createToken("CTRL_CHARACTER");
+    IElementType CTRL_CHARACTER = new IElementType("CTRL_CHARACTER");
     // "\\" ("t" | "n" | "r" | "f" | "a" | "e")
-    int ESC_CTRL_CHARACTER = TokenType.createToken("ESC_CTRL_CHARACTER");
+    IElementType ESC_CTRL_CHARACTER = new IElementType("ESC_CTRL_CHARACTER");
     // "\\" ("." | "|" | "$" | "^" | "?" | "*" | "+" | "[" | "{" | "(" | ")")
-    int ESC_CHARACTER = TokenType.createToken("ESC_CHARACTER");
+    IElementType ESC_CHARACTER = new IElementType("ESC_CHARACTER");
     // "\\" ("w" | "W" | "s" | "S" | "d" | "D")
-    int CHAR_CLASS = TokenType.createToken("CHAR_CLASS");
+    IElementType CHAR_CLASS = new IElementType("CHAR_CLASS");
     // "\\u" XXXX
-    int UNICODE_CHAR = TokenType.createToken("UNICODE_CHAR");
+    IElementType UNICODE_CHAR = new IElementType("UNICODE_CHAR");
     // "\\x" XX
-    int HEX_CHAR = TokenType.createToken("HEX_CHAR");
+    IElementType HEX_CHAR = new IElementType("HEX_CHAR");
     // "\\0" OOO
-    int OCT_CHAR = TokenType.createToken("OCT_CHAR");
+    IElementType OCT_CHAR = new IElementType("OCT_CHAR");
     // "\\c" x
-    int CTRL = TokenType.createToken("CTRL");
+    IElementType CTRL = new IElementType("CTRL");
     // "\\p" | "\\P"
-    int PROPERTY = TokenType.createToken("PROPERTY");
+    IElementType PROPERTY = new IElementType("PROPERTY");
 
     // e.g. "\\#" but also "\\q" which is not a valid escape actually
-    int REDUNDANT_ESCAPE = TokenType.createToken("REDUNDANT_ESCAPE");
+    IElementType REDUNDANT_ESCAPE = new IElementType("REDUNDANT_ESCAPE");
 
-    int MINUS = TokenType.createToken("MINUS");
-    int CHARACTER = TokenType.createToken("CHARACTER");
+    IElementType MINUS = new IElementType("MINUS");
+    IElementType CHARACTER = new IElementType("CHARACTER");
 
-    int BAD_CHARACTER = TokenType.createToken("BAD_CHARACTER");
-    int BAD_OCT_VALUE = TokenType.createToken("BAD_OCT_VALUE");
-    int BAD_HEX_VALUE = TokenType.createToken("BAD_HEX_VALUE");
+    IElementType BAD_CHARACTER = new IElementType("BAD_CHARACTER");
+    IElementType BAD_OCT_VALUE = new IElementType("BAD_OCT_VALUE");
+    IElementType BAD_HEX_VALUE = new IElementType("BAD_HEX_VALUE");
 
-    int COMMENT = TokenType.createToken("COMMENT");
-    int OPTIONS_ON = TokenType.createToken("OPTIONS_ON");
-    int OPTIONS_OFF = TokenType.createToken("OPTIONS_OFF");
+    IElementType COMMENT = new IElementType("COMMENT");
+    IElementType OPTIONS_ON = new IElementType("OPTIONS_ON");
+    IElementType OPTIONS_OFF = new IElementType("OPTIONS_OFF");
 
     // (?P<name>...
-    int PYTHON_NAMED_GROUP = TokenType.createToken("PYTHON_NAMED_GROUP");
+    IElementType PYTHON_NAMED_GROUP = new IElementType("PYTHON_NAMED_GROUP");
     // (?P=name)
-    int PYTHON_NAMED_GROUP_REF = TokenType.createToken("PYTHON_NAMED_GROUP_REF");
+    IElementType PYTHON_NAMED_GROUP_REF = new IElementType("PYTHON_NAMED_GROUP_REF");
     // (?(id/name)yes-pattern|no-pattern)
-    int PYTHON_COND_REF = TokenType.createToken("PYTHON_COND_REF");
+    IElementType PYTHON_COND_REF = new IElementType("PYTHON_COND_REF");
   
     // (?<name>...
-    int RUBY_NAMED_GROUP = TokenType.createToken("RUBY_NAMED_GROUP");
+    IElementType RUBY_NAMED_GROUP = new IElementType("RUBY_NAMED_GROUP");
 
     // (?'name'...
-    int RUBY_QUOTED_NAMED_GROUP = TokenType.createToken("RUBY_QUOTED_NAMED_GROUP");
+    IElementType RUBY_QUOTED_NAMED_GROUP = new IElementType("RUBY_QUOTED_NAMED_GROUP");
 
-    int INVALID_CHARACTER_ESCAPE_TOKEN = TokenType.createToken("INVALID_CHARACTER_ESCAPE_TOKEN");
-    int VALID_STRING_ESCAPE_TOKEN = TokenType.createToken("VALID_STRING_ESCAPE_TOKEN");
-    int INVALID_UNICODE_ESCAPE_TOKEN = TokenType.createToken("INVALID_UNICODE_ESCAPE_TOKEN");
+    IElementType INVALID_CHARACTER_ESCAPE_TOKEN = new IElementType("INVALID_CHARACTER_ESCAPE_TOKEN");
+    IElementType VALID_STRING_ESCAPE_TOKEN = new IElementType("VALID_STRING_ESCAPE_TOKEN");
+    IElementType INVALID_UNICODE_ESCAPE_TOKEN = new IElementType("INVALID_UNICODE_ESCAPE_TOKEN");
 
     TokenSet KEYWORDS = TokenSet.create(DOT, STAR, QUEST, PLUS);
 

@@ -16,10 +16,9 @@
 
 package com.ess.regexutil.gwt.psi.client.parser;
 
-import com.ess.regexutil.gwt.psi.client.CompositePsiElement;
-import com.ess.regexutil.gwt.psi.client.LeafPsiElement;
-import com.ess.regexutil.gwt.psi.client.PsiElement;
-import com.ess.regexutil.gwt.psi.client.PsiFile;
+import com.ess.regexutil.gwt.psi.client.*;
+import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.lexer.Lexer;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 
@@ -30,14 +29,14 @@ import java.util.*;
  */
 public class PsiBuilderImpl implements PsiBuilder {
   private int[] myLexStarts;
-  private int[] myLexTypes;
+  private IElementType[] myLexTypes;
   private int myCurrentLexeme;
 
   private MarkerImpl currentMarker;
 
   private final Lexer myLexer;
   private final TokenSet myWhitespaces;
-  private TokenSet myComments;
+  private final TokenSet myComments;
 
   private final String myText;
 
@@ -62,14 +61,14 @@ public class PsiBuilderImpl implements PsiBuilder {
     int approxLexCount = myText.length();
 
     myLexStarts = new int[approxLexCount];
-    myLexTypes = new int[approxLexCount];
+    myLexTypes = new IElementType[approxLexCount];
 
     myLexer.start(myText);
     int i = 0;
     int offset = 0;
     while (true) {
-      int type = myLexer.getTokenType();
-      if (type == 0) break;
+      IElementType type = myLexer.getTokenType();
+      if (type == null) break;
 
       if (i >= myLexTypes.length - 1) {
         resizeLexemes(i * 3 / 2);
@@ -77,7 +76,7 @@ public class PsiBuilderImpl implements PsiBuilder {
       int tokenStart = myLexer.getTokenStart();
       if (tokenStart < offset) {
         final StringBuilder sb = new StringBuilder();
-        int tokenType = myLexer.getTokenType();
+        IElementType tokenType = myLexer.getTokenType();
         sb.append("Token sequence broken")
           .append("\n  this: '").append(myLexer.getTokenText()).append("' (").append(tokenType).append(':')
           .append(") ").append(tokenStart).append(":").append(myLexer.getTokenEnd());
@@ -126,8 +125,8 @@ public class PsiBuilderImpl implements PsiBuilder {
   }
 
   @Override
-  public int getTokenType() {
-    if (eof()) return 0;
+  public IElementType getTokenType() {
+    if (eof()) return null;
 
     //if (myRemapper != null) {
     //  IElementType type = myLexTypes[myCurrentLexeme];
@@ -150,9 +149,9 @@ public class PsiBuilderImpl implements PsiBuilder {
 
 //  @Nullable
   @Override
-  public int lookAhead(int steps) {
+  public IElementType lookAhead(int steps) {
     if (eof()) {    // ensure we skip over whitespace if it's needed
-      return 0;
+      return null;
     }
     int cur = myCurrentLexeme;
 
@@ -165,13 +164,13 @@ public class PsiBuilderImpl implements PsiBuilder {
       steps--;
     }
 
-    return cur < myLexemeCount ? myLexTypes[cur] : 0;
+    return cur < myLexemeCount ? myLexTypes[cur] : null;
   }
 
   @Override
-  public int rawLookup(int steps) {
+  public IElementType rawLookup(int steps) {
     int cur = myCurrentLexeme + steps;
-    return cur < myLexemeCount && cur >= 0 ? myLexTypes[cur] : 0;
+    return cur < myLexemeCount && cur >= 0 ? myLexTypes[cur] : null;
   }
 
   @Override
@@ -202,7 +201,7 @@ public class PsiBuilderImpl implements PsiBuilder {
     }
   }
 
-  private void onSkip(int type, int start, int end) {
+  private void onSkip(IElementType type, int start, int end) {
     //if (myWhitespaceSkippedCallback != null) {
     //  myWhitespaceSkippedCallback.onSkip(type, start, end);
     //}
@@ -228,12 +227,12 @@ public class PsiBuilderImpl implements PsiBuilder {
     System.arraycopy(myLexStarts, 0, newStarts, 0, count);
     myLexStarts = newStarts;
 
-    int[] newTypes = new int[newSize];
+    IElementType[] newTypes = new IElementType[newSize];
     System.arraycopy(myLexTypes, 0, newTypes, 0, count);
     myLexTypes = newTypes;
   }
 
-  private boolean whitespaceOrComment(int token) {
+  private boolean whitespaceOrComment(IElementType token) {
     return myWhitespaces.contains(token) || myComments.contains(token);
   }
 
@@ -248,7 +247,9 @@ public class PsiBuilderImpl implements PsiBuilder {
 
   @Override
   public void error(String messageText) {
-
+    if (currentMarker.elements.isEmpty() || currentMarker.elements.get(0).getType() != ElementTypes.ERROR_ELEMENT) {
+      currentMarker.elements.add(new ErrorPsiElement(messageText));
+    }
   }
 
 
@@ -289,6 +290,17 @@ public class PsiBuilderImpl implements PsiBuilder {
     }
 
     @Override
+    public MarkerImpl precede() {
+      if (currentMarker != this) throw new UnsupportedOperationException();
+
+      MarkerImpl res = new MarkerImpl(parent);
+
+      parent = res;
+
+      return res;
+    }
+
+    @Override
     public void drop() {
       assert currentMarker == this;
 
@@ -305,14 +317,8 @@ public class PsiBuilderImpl implements PsiBuilder {
     }
 
     @Override
-    public void done(LeafPsiElement element) {
-      assert currentMarker == this;
-      assert elements.isEmpty();
-
-      element.setLength(getCurrentOffset() - myLexStarts[firstLexem]);
-      parent.elements.add(element);
-
-      currentMarker = parent;
+    public void done(IElementType type) {
+      done(new CompositePsiElement(type));
     }
 
     @Override
@@ -327,10 +333,9 @@ public class PsiBuilderImpl implements PsiBuilder {
       currentMarker = parent;
     }
 
-
     @Override
     public void error(String message) {
-
+      throw new UnsupportedOperationException();
     }
   }
 }

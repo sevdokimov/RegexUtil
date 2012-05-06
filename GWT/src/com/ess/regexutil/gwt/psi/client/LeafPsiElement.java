@@ -1,5 +1,7 @@
 package com.ess.regexutil.gwt.psi.client;
 
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
+
 /**
  * @author Sergey Evdokimov
  */
@@ -7,13 +9,8 @@ public class LeafPsiElement extends PsiElement {
 
   private int length;
 
-  public LeafPsiElement(int type) {
+  public LeafPsiElement(IElementType type) {
     super(type);
-  }
-
-  @Override
-  public int getType() {
-    return type;
   }
 
   @Override

@@ -20,6 +20,7 @@ import com.ess.regexutil.gwt.psi.client.CompositePsiElement;
 import com.ess.regexutil.gwt.psi.client.LeafPsiElement;
 import com.ess.regexutil.gwt.psi.client.PsiElement;
 import com.ess.regexutil.gwt.psi.client.PsiFile;
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 
 /**
@@ -47,21 +48,21 @@ public interface PsiBuilder {
    *
    * @return the token type, or null when lexing is over.
    */
-  int getTokenType();
+  IElementType getTokenType();
 
   /**
    * See what token type is in <code>steps</code> ahead
    * @param steps 0 is current token (i.e. the same {@link PsiBuilder#getTokenType()} returns)
    * @return type element which getTokenType() will return if we call advance <code>steps</code> times in a row
    */
-  int lookAhead(int steps);
+  IElementType lookAhead(int steps);
 
   /**
    * See what token type is in <code>steps</code> ahead / behind
    * @param steps 0 is current token (i.e. the same {@link PsiBuilder#getTokenType()} returns)
    * @return type element ahead or behind, including whitespace / comment tokens
    */
-  int rawLookup(int steps);
+  IElementType rawLookup(int steps);
 
   /**
    * See what token type is in <code>steps</code> ahead / behind current position
@@ -98,7 +99,7 @@ public interface PsiBuilder {
      *
      * @return the new marker instance.
      */
-    //Marker precede();
+    Marker precede();
 
     /**
      * Drops this marker. Can be called after other markers have been added and completed
@@ -117,9 +118,9 @@ public interface PsiBuilder {
      * all markers added after the beginning of this marker must be either dropped or completed.
      *
      */
-    void done(LeafPsiElement element);
+    void done(CompositePsiElement psiElement);
 
-    void done(CompositePsiElement element);
+    void done(IElementType type);
 
     /**
      * Like {@linkplain #done(PsiElement)}, but collapses all tokens between start and end markers

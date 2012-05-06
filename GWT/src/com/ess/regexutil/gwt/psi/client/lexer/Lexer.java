@@ -62,7 +62,7 @@ public abstract class Lexer {
    *
    * @return the current token.
    */
-  public abstract int getTokenType();
+  public abstract IElementType getTokenType();
 
   /**
    * Returns the start offset of the current token.

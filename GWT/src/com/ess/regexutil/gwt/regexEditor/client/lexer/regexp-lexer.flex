@@ -1,7 +1,8 @@
 package com.ess.regexutil.gwt.regexEditor.client.lexer;
 
 import com.ess.regexutil.gwt.psi.client.lexer.FlexLexer;
-import com.ess.regexutil.gwt.psi.client.lexer.TokenType;
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
+import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
 import java.util.LinkedList;
 import java.util.EnumSet;
 
@@ -13,8 +14,8 @@ import java.util.EnumSet;
 %implements FlexLexer
 %unicode
 %function advance
-%type int
-%eof{  return 0;
+%type IElementType
+%eof{  return;
 %eof}
 
 %{
@@ -30,13 +31,13 @@ import java.util.EnumSet;
     private boolean allowNestedCharacterClasses;
     private boolean allowOctalNoLeadingZero;
 
-    _RegExLexer(EnumSet<RegExpCapability> capabilities) {
+    _RegExLexer(EnumSet<RegexCapability> capabilities) {
       this((java.io.Reader)null);
-      this.xmlSchemaMode = capabilities.contains(RegExpCapability.XML_SCHEMA_MODE);
-      this.allowDanglingMetacharacters = capabilities.contains(RegExpCapability.DANGLING_METACHARACTERS);
-      this.allowNestedCharacterClasses = capabilities.contains(RegExpCapability.NESTED_CHARACTER_CLASSES);
-      this.allowOctalNoLeadingZero = capabilities.contains(RegExpCapability.OCTAL_NO_LEADING_ZERO);
-      this.commentMode = capabilities.contains(RegExpCapability.COMMENT_MODE);
+      this.xmlSchemaMode = capabilities.contains(RegexCapability.XML_SCHEMA_MODE);
+      this.allowDanglingMetacharacters = capabilities.contains(RegexCapability.DANGLING_METACHARACTERS);
+      this.allowNestedCharacterClasses = capabilities.contains(RegexCapability.NESTED_CHARACTER_CLASSES);
+      this.allowOctalNoLeadingZero = capabilities.contains(RegexCapability.OCTAL_NO_LEADING_ZERO);
+      this.commentMode = capabilities.contains(RegexCapability.COMMENT_MODE);
     }
 
     private void yypushstate(int state) {
@@ -239,7 +240,7 @@ HEX_CHAR=[0-9a-fA-F]
   {RBRACKET}            { yypopstate(); return RegExpTT.CLASS_END; }
 
   "&&"                  { return allowNestedCharacterClasses ? RegExpTT.ANDAND : RegExpTT.CHARACTER;    }
-  [\n\b\t\r\f]          { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.ESC_CHARACTER; }
+  [\n\b\t\r\f]          { return commentMode ? ElementTypes.WHITE_SPACE : RegExpTT.ESC_CHARACTER; }
   {ANY}                 { return RegExpTT.CHARACTER; }
 }
 
@@ -315,7 +316,7 @@ HEX_CHAR=[0-9a-fA-F]
   [^\r\n]*[\r\n]?  { yypopstate(); return RegExpTT.COMMENT; }
 }
 
-" "          { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.CHARACTER; }
-[\n\b\t\r\f]   { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.CTRL_CHARACTER; }
+" "          { return commentMode ? ElementTypes.WHITE_SPACE : RegExpTT.CHARACTER; }
+[\n\b\t\r\f]   { return commentMode ? ElementTypes.WHITE_SPACE : RegExpTT.CTRL_CHARACTER; }
 
 {ANY}        { return RegExpTT.CHARACTER; }

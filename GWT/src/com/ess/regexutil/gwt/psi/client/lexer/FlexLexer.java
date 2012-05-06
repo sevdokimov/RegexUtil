@@ -25,6 +25,6 @@ public interface FlexLexer {
   int yystate();
   int getTokenStart();
   int getTokenEnd();
-  int advance() throws IOException;
+  IElementType advance() throws IOException;
   void reset(String buf, int start, int end, int initialState);
 }

@@ -17,6 +17,7 @@ package com.ess.regexutil.gwt.regexEditor.client.parser;
 
 
 import com.ess.regexutil.gwt.psi.client.PsiFile;
+import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.parser.PsiBuilder;
 import com.ess.regexutil.gwt.psi.client.parser.PsiParser;
 import com.ess.regexutil.gwt.regexEditor.client.lexer.RegExpTT;
@@ -132,11 +133,11 @@ public class RegExpParser implements PsiParser {
     if (builder.getTokenType() == RegExpTT.LBRACE) {
       builder.advanceLexer();
       boolean minOmitted = false;
-      if (builder.getTokenType() == RegExpTT.COMMA && myCapabilities.contains(RegExpCapability.OMIT_NUMBERS_IN_QUANTIFIERS)) {
+      if (builder.getTokenType() == RegExpTT.COMMA && myCapabilities.contains(RegexCapability.OMIT_NUMBERS_IN_QUANTIFIERS)) {
         minOmitted = true;
         builder.advanceLexer();
       }
-      else if (builder.getTokenType() != RegExpTT.NUMBER && myCapabilities.contains(RegExpCapability.DANGLING_METACHARACTERS)) {
+      else if (builder.getTokenType() != RegExpTT.NUMBER && myCapabilities.contains(RegexCapability.DANGLING_METACHARACTERS)) {
         marker.done(RegExpTT.CHARACTER);
         return true;
       }
@@ -314,7 +315,7 @@ public class RegExpParser implements PsiParser {
    * GROUP  ::= "(" PATTERN ")" | TERM
    * TERM   ::= "." | "$" | "^" | CHAR | CLASS | BACKREF
    */
-  @Nullable
+  //@Nullable
   private PsiBuilder.Marker parseGroup(PsiBuilder builder) {
     final IElementType type = builder.getTokenType();
 
@@ -358,7 +359,7 @@ public class RegExpParser implements PsiParser {
         marker.done(RegExpElementTypes.SET_OPTIONS);
       }
     }
-    else if (type == StringEscapesTokenTypes.INVALID_CHARACTER_ESCAPE_TOKEN) {
+    else if (type == RegExpTT.INVALID_CHARACTER_ESCAPE_TOKEN) {
       builder.error("Illegal/unsupported escape sequence");
       builder.advanceLexer();
       marker.done(RegExpElementTypes.CHAR);
@@ -428,7 +429,7 @@ public class RegExpParser implements PsiParser {
       marker.drop();
       return parseClass(builder);
     }
-    else if (type == RegExpTT.LBRACE && myCapabilities.contains(RegExpCapability.DANGLING_METACHARACTERS)) {
+    else if (type == RegExpTT.LBRACE && myCapabilities.contains(RegexCapability.DANGLING_METACHARACTERS)) {
       builder.advanceLexer();
       marker.done(RegExpElementTypes.CHAR);
     }
