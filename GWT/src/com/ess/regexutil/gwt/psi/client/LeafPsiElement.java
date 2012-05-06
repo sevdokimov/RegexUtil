@@ -5,22 +5,23 @@ package com.ess.regexutil.gwt.psi.client;
  */
 public class LeafPsiElement extends PsiElement {
 
-    private final int type;
-    private final int length;
+  private int length;
 
-    public LeafPsiElement(String text, int index, int length, int type) {
-        super(text, index);
-        this.length = length;
-        this.type = type;
-    }
+  public LeafPsiElement(int type) {
+    super(type);
+  }
 
-    @Override
-    public int getType() {
-        return type;
-    }
+  @Override
+  public int getType() {
+    return type;
+  }
 
-    @Override
-    public int getLength() {
-        return length;
-    }
+  @Override
+  public int getLength() {
+    return length;
+  }
+
+  public void setLength(int length) {
+    this.length = length;
+  }
 }

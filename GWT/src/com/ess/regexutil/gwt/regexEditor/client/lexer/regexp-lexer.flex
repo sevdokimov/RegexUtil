@@ -239,7 +239,7 @@ HEX_CHAR=[0-9a-fA-F]
   {RBRACKET}            { yypopstate(); return RegExpTT.CLASS_END; }
 
   "&&"                  { return allowNestedCharacterClasses ? RegExpTT.ANDAND : RegExpTT.CHARACTER;    }
-  [\n\b\t\r\f]          { return commentMode ? ITokenType.WHITE_SPACE : RegExpTT.ESC_CHARACTER; }
+  [\n\b\t\r\f]          { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.ESC_CHARACTER; }
   {ANY}                 { return RegExpTT.CHARACTER; }
 }
 
@@ -315,7 +315,7 @@ HEX_CHAR=[0-9a-fA-F]
   [^\r\n]*[\r\n]?  { yypopstate(); return RegExpTT.COMMENT; }
 }
 
-" "          { return commentMode ? ITokenType.WHITE_SPACE : RegExpTT.CHARACTER; }
-[\n\b\t\r\f]   { return commentMode ? ITokenType.WHITE_SPACE : RegExpTT.CTRL_CHARACTER; }
+" "          { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.CHARACTER; }
+[\n\b\t\r\f]   { return commentMode ? TokenType.WHITE_SPACE : RegExpTT.CTRL_CHARACTER; }
 
 {ANY}        { return RegExpTT.CHARACTER; }

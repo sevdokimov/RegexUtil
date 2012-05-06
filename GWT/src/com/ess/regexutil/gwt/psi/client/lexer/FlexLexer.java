@@ -26,5 +26,5 @@ public interface FlexLexer {
   int getTokenStart();
   int getTokenEnd();
   int advance() throws IOException;
-  void reset(CharSequence buf, int start, int end, int initialState);
+  void reset(String buf, int start, int end, int initialState);
 }

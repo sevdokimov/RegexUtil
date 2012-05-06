@@ -18,7 +18,7 @@ package com.ess.regexutil.gwt.regexEditor.client.lexer;
 /**
  * @author yole
  */
-public enum RegExpCapability {
+public enum RegexCapability {
   XML_SCHEMA_MODE,
   DANGLING_METACHARACTERS,
   NESTED_CHARACTER_CLASSES,

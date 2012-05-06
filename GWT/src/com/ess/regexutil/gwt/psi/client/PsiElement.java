@@ -5,52 +5,70 @@ package com.ess.regexutil.gwt.psi.client;
  */
 public abstract class PsiElement {
 
-    private PsiElement parent;
-    private PsiElement next;
-    private PsiElement prev;
+  protected static int counter = 1;
 
-    private final int index;
-    private final String text;
+  protected PsiElement parent;
+  protected PsiElement next;
+  protected PsiElement prev;
 
-    public PsiElement(String text, int index) {
-        this.text = text;
-        this.index = index;
+  private int cachedIndex = -1;
+
+  protected final int type;
+
+  protected PsiElement(int type) {
+    this.type = type;
+  }
+
+  public int getIndex() {
+    if (cachedIndex == -1) {
+      int res = parent == null ? 0 : parent.getIndex();
+
+      if (prev != null) {
+        res += prev.getIndex() + prev.getLength();
+      }
+
+      cachedIndex = res;
     }
+    return cachedIndex;
+  }
 
-    public String getText() {
-        return text;
-    }
+  public int getType() {
+    return type;
+  }
 
-    public int getIndex() {
-        return index;
-    }
+  public abstract int getLength();
 
-    public abstract int getType();
-    public abstract int getLength();
+  public PsiElement getNext() {
+    return next;
+  }
 
-    public PsiElement getNext() {
-        return next;
-    }
+  public PsiElement getPrev() {
+    return prev;
+  }
 
-    public PsiElement getPrev() {
-        return prev;
-    }
+  public void setPrev(PsiElement prev) {
+    assert this.prev == null;
+    this.prev = prev;
+  }
 
-    public void setPrev(PsiElement prev) {
-        assert this.prev == null;
-        this.prev = prev;
-    }
+  public void setNext(PsiElement next) {
+    assert this.next == null;
+    this.next = next;
+  }
 
-    public void setNext(PsiElement next) {
-        assert this.next == null;
-        this.next = next;
-    }
+  public PsiElement getParent() {
+    return parent;
+  }
 
-    public PsiElement getParent() {
-        return parent;
-    }
+  public void setParent(PsiElement parent) {
+    this.parent = parent;
+  }
 
-    public void setParent(PsiElement parent) {
-        this.parent = parent;
-    }
+  public PsiElement getFirstChild() {
+    return null;
+  }
+
+  public PsiElement getLastChild() {
+    return null;
+  }
 }

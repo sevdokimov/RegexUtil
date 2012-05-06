@@ -11,6 +11,7 @@ public class TokenType {
     private static final List<String> descriptions = new ArrayList<String>();
 
     public static final int WHITE_SPACE = createToken("WHITE_SPACE");
+    public static final int ERROR_ELEMENT = createToken("ERROR_ELEMENT");
 
     public static int createToken(String description) {
         descriptions.add(description);
