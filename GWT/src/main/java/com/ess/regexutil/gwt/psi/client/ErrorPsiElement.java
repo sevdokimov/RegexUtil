@@ -1,12 +1,11 @@
 package com.ess.regexutil.gwt.psi.client;
 
 import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
-import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 
 /**
  * @author Sergey Evdokimov
  */
-public class ErrorPsiElement extends PsiElement {
+public class ErrorPsiElement extends CompositePsiElement {
 
   private String myMessage;
 
@@ -17,10 +16,5 @@ public class ErrorPsiElement extends PsiElement {
 
   public String getMessage() {
     return myMessage;
-  }
-
-  @Override
-  public int getLength() {
-    return 0;
   }
 }

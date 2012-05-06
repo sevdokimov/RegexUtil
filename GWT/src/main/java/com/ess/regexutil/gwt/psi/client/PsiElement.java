@@ -2,6 +2,9 @@ package com.ess.regexutil.gwt.psi.client;
 
 import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Sergey Evdokimov
  */
@@ -34,7 +37,7 @@ public abstract class PsiElement {
     return cachedIndex;
   }
 
-  public IElementType getType() {
+  public IElementType getElementType() {
     return type;
   }
 
@@ -72,5 +75,24 @@ public abstract class PsiElement {
 
   public PsiElement getLastChild() {
     return null;
+  }
+
+  public List<PsiElement> getChildren() {
+    List<PsiElement> res = new ArrayList<PsiElement>();
+
+    for (PsiElement e = getFirstChild(); e != null; e = e.getNext()) {
+      res.add(e);
+    }
+
+    return res;
+  }
+
+  @Override
+  public String toString() {
+    if (cachedIndex == -1) {
+      return type.toString();
+    }
+
+    return type.toString() + " " + cachedIndex;
   }
 }

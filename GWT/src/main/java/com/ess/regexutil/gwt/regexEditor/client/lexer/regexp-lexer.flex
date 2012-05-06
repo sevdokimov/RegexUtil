@@ -32,7 +32,6 @@ import java.util.EnumSet;
     private boolean allowOctalNoLeadingZero;
 
     _RegExLexer(EnumSet<RegexCapability> capabilities) {
-      this((java.io.Reader)null);
       this.xmlSchemaMode = capabilities.contains(RegexCapability.XML_SCHEMA_MODE);
       this.allowDanglingMetacharacters = capabilities.contains(RegexCapability.DANGLING_METACHARACTERS);
       this.allowNestedCharacterClasses = capabilities.contains(RegexCapability.NESTED_CHARACTER_CLASSES);

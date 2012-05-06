@@ -22,8 +22,6 @@ import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.lexer.Lexer;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 
-import java.util.*;
-
 /**
  * @author max
  */
@@ -32,8 +30,6 @@ public class PsiBuilderImpl implements PsiBuilder {
   private IElementType[] myLexTypes;
   private int myCurrentLexeme;
 
-  private MarkerImpl currentMarker;
-
   private final Lexer myLexer;
   private final TokenSet myWhitespaces;
   private final TokenSet myComments;
@@ -41,6 +37,9 @@ public class PsiBuilderImpl implements PsiBuilder {
   private final String myText;
 
   private int myLexemeCount = 0;
+
+  private Node myFirstNode;
+  private Node myLastNode;
 
   public PsiBuilderImpl(TokenSet whiteSpaces,
                         TokenSet comments,
@@ -53,8 +52,6 @@ public class PsiBuilderImpl implements PsiBuilder {
     myComments = comments;
 
     cacheLexemes();
-
-    currentMarker = mark();
   }
 
   private void cacheLexemes() {
@@ -189,7 +186,6 @@ public class PsiBuilderImpl implements PsiBuilder {
   @Override
   public void advanceLexer() {
     if (eof()) return;
-    assert currentMarker.elements.isEmpty();
 
     myCurrentLexeme++;
   }
@@ -238,18 +234,23 @@ public class PsiBuilderImpl implements PsiBuilder {
 
   @Override
   public MarkerImpl mark() {
-    assert myCurrentLexeme == currentMarker.firstLexem || currentMarker.elements.size() > 0;
-
-    MarkerImpl res = new MarkerImpl(currentMarker);
-    currentMarker = res;
+    MarkerImpl res = new MarkerImpl(myCurrentLexeme);
+    addToEnd(res);
     return res;
   }
 
   @Override
   public void error(String messageText) {
-    if (currentMarker.elements.isEmpty() || currentMarker.elements.get(0).getType() != ElementTypes.ERROR_ELEMENT) {
-      currentMarker.elements.add(new ErrorPsiElement(messageText));
+    if (myLastNode instanceof CloseMarker) {
+      if (((CloseMarker)myLastNode).myPsiElement.getElementType() == ElementTypes.ERROR_ELEMENT) {
+        return;
+      }
     }
+
+    MarkerImpl marker = new MarkerImpl(myCurrentLexeme);
+    addToEnd(marker);
+    CloseMarker closeMarker = new CloseMarker(new ErrorPsiElement(messageText), marker);
+    addToEnd(closeMarker);
   }
 
 
@@ -260,14 +261,20 @@ public class PsiBuilderImpl implements PsiBuilder {
   }
 
   public PsiFile build() {
-    assert currentMarker.parent == null;
+    assert myFirstNode == null || ((MarkerImpl)myFirstNode).myCloseMarker == myLastNode;
     assert eof();
 
     PsiFile file = new PsiFile(getOriginalText());
 
-    for (PsiElement element : currentMarker.elements) {
-      file.addElement(element);
-    }
+    MarkerImpl fakeNode = new MarkerImpl(0);
+    fakeNode.next = myFirstNode;
+    myFirstNode = fakeNode;
+
+    CloseMarker closeMarker = new CloseMarker(file, fakeNode);
+    fakeNode.myCloseMarker = closeMarker;
+    addToEnd(closeMarker);
+
+    fakeNode.build();
 
     if (file.getLength() != getOriginalText().length()) {
       throw new AssertionError();
@@ -276,44 +283,152 @@ public class PsiBuilderImpl implements PsiBuilder {
     return file;
   }
 
-  private class MarkerImpl implements Marker {
+  private class Node {
+    protected Node prev;
+    protected Node next;
 
-    private MarkerImpl parent;
+    private boolean myDeleted;
 
-    private int firstLexem = myCurrentLexeme;
-    //private int firstUndoneLexem = myCurrentLexeme;
+    protected void remove() {
+      assert !myDeleted;
 
-    private List<PsiElement> elements = new ArrayList<PsiElement>();
+      if (prev != null) {
+        prev.next = next;
+      }
+      else {
+        myFirstNode = next;
+      }
 
-    private MarkerImpl(MarkerImpl parent) {
-      this.parent = parent;
+      if (next != null) {
+        next.prev = prev;
+      }
+      else {
+        myLastNode = prev;
+      }
+
+      myDeleted = true;
+    }
+
+    protected void insertBefore(Node node) {
+      assert !myDeleted;
+
+      node.prev = prev;
+      node.next = this;
+
+      if (prev == null) {
+        myFirstNode = node;
+      }
+      else {
+        prev.next = node;
+      }
+
+      prev = node;
+    }
+  }
+
+  protected void addToEnd(Node node) {
+    node.prev = myLastNode;
+    assert node.next == null;
+
+    if (myLastNode != null) {
+      myLastNode.next = node;
+    }
+    else {
+      myFirstNode = node;
+    }
+
+    myLastNode = node;
+  }
+
+  private class CloseMarker extends Node {
+    private final int myLexemIndex = myCurrentLexeme;
+
+    private CompositePsiElement myPsiElement;
+
+    private final MarkerImpl myStartMarker;
+
+    private CloseMarker(IElementType elementType, MarkerImpl startMarker) {
+      this(new CompositePsiElement(elementType), startMarker);
+    }
+
+    private CloseMarker(CompositePsiElement psiElement, MarkerImpl startMarker) {
+      myPsiElement = psiElement;
+      myStartMarker = startMarker;
+    }
+  }
+
+  private class MarkerImpl extends Node implements Marker {
+
+    private final int myLexemIndex;
+
+    private CloseMarker myCloseMarker;
+
+    MarkerImpl(int lexemIndex) {
+      this.myLexemIndex = lexemIndex;
+    }
+
+    void build() {
+      int i = myLexemIndex;
+
+      for (Node node = next; node != myCloseMarker; ) {
+        MarkerImpl m = (MarkerImpl)node;
+
+        while (i < m.myLexemIndex) {
+          LeafPsiElement element = new LeafPsiElement(myLexTypes[i]);
+          element.setLength(myLexStarts[i + 1] - myLexStarts[i]);
+
+          myCloseMarker.myPsiElement.addElement(element);
+
+          i++;
+        }
+
+        m.build();
+        myCloseMarker.myPsiElement.addElement(m.myCloseMarker.myPsiElement);
+
+        i = m.myCloseMarker.myLexemIndex;
+        node = m.myCloseMarker.next;
+      }
+
+      while (i < myCloseMarker.myLexemIndex) {
+        LeafPsiElement element = new LeafPsiElement(myLexTypes[i]);
+        element.setLength(myLexStarts[i + 1] - myLexStarts[i]);
+
+        myCloseMarker.myPsiElement.addElement(element);
+
+        i++;
+      }
     }
 
     @Override
     public MarkerImpl precede() {
-      if (currentMarker != this) throw new UnsupportedOperationException();
+      MarkerImpl parent = findParent();
+      assert parent == null || parent.myCloseMarker == null;
 
-      MarkerImpl res = new MarkerImpl(parent);
-
-      parent = res;
+      MarkerImpl res = new MarkerImpl(myLexemIndex);
+      insertBefore(res);
 
       return res;
     }
 
     @Override
     public void drop() {
-      assert currentMarker == this;
+      assert myCloseMarker == null;
 
-      parent.elements.addAll(elements);
-      //parent.firstUndoneLexem = firstUndoneLexem;
-      currentMarker = parent;
+      remove();
     }
 
     @Override
     public void rollbackTo() {
-      assert currentMarker == this;
-      myCurrentLexeme = firstLexem;
-      currentMarker = parent;
+      if (prev == null) {
+        myFirstNode = null;
+      }
+      else {
+        prev.next = null;
+      }
+
+      myLastNode = prev;
+
+      myCurrentLexeme = myLexemIndex;
     }
 
     @Override
@@ -321,21 +436,61 @@ public class PsiBuilderImpl implements PsiBuilder {
       done(new CompositePsiElement(type));
     }
 
-    @Override
-    public void done(CompositePsiElement element) {
-      assert currentMarker == this;
+    private MarkerImpl findParent() {
+      Node node = prev;
 
-      for (PsiElement psiElement : elements) {
-        element.addElement(psiElement);
+      while (node != null) {
+        if (node instanceof CloseMarker) {
+          node = ((CloseMarker)node).myStartMarker.prev;
+        }
+        else {
+          return (MarkerImpl)node;
+        }
       }
 
-      parent.elements.add(element);
-      currentMarker = parent;
+      return null;
+    }
+
+    @Override
+    public void done(CompositePsiElement element) {
+      assert myCloseMarker == null;
+
+      Node node = myLastNode;
+      while (node != this) {
+        if (node instanceof CloseMarker) {
+          node = ((CloseMarker)node).myStartMarker.prev;
+        }
+        else {
+          throw new AssertionError();
+        }
+      }
+
+      CloseMarker closeMarker = new CloseMarker(element, this);
+      myCloseMarker = closeMarker;
+      addToEnd(closeMarker);
     }
 
     @Override
     public void error(String message) {
       throw new UnsupportedOperationException();
     }
+
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+
+      sb.append("[").append(myLexStarts[myLexemIndex]).append("..");
+
+      if (myCloseMarker == null) {
+        sb.append(")");
+      }
+      else {
+        sb.append(myLexStarts[myCloseMarker.myLexemIndex]).append("] ");
+        sb.append(getOriginalText().substring(myLexStarts[myLexemIndex], myLexStarts[myCloseMarker.myLexemIndex]));
+      }
+      sb.append(" ");
+
+      return sb.toString();
+    }
+
   }
 }

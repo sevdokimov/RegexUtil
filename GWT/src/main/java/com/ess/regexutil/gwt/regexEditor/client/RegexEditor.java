@@ -1,8 +1,14 @@
 package com.ess.regexutil.gwt.regexEditor.client;
 
+import com.ess.regexutil.gwt.psi.client.PsiFile;
+import com.ess.regexutil.gwt.psi.client.Utils;
 import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
+import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
+import com.ess.regexutil.gwt.psi.client.parser.PsiBuilderImpl;
+import com.ess.regexutil.gwt.psi.client.parser.PsiParser;
 import com.ess.regexutil.gwt.regexEditor.client.lexer.RegexCapability;
 import com.ess.regexutil.gwt.regexEditor.client.lexer.RegexLexer;
+import com.ess.regexutil.gwt.regexEditor.client.parser.RegExpParser;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,24 +34,24 @@ public class RegexEditor implements EntryPoint {
       public void onClick(ClickEvent event) {
         String regexText = regex.getText();
 
-
         RegexLexer lexer = new RegexLexer(EnumSet.of(RegexCapability.NESTED_CHARACTER_CLASSES));
-        lexer.start(regexText);
 
-        StringBuilder text = new StringBuilder();
+        PsiBuilderImpl builder = new PsiBuilderImpl(TokenSet.EMPTY, TokenSet.EMPTY, lexer, regexText);
+        PsiParser parser = new RegExpParser();
 
+        PsiFile file = parser.parse(builder);
 
-        text.append("<br><br>");
+        String text = Utils.toString(file);
 
         try {
           RegExp r = RegExp.compile(regexText);
-          text.append("Success");
+          text += "Success";
         }
         catch (Exception e) {
-          text.append(e.getMessage());
+          text += e.getMessage();
         }
 
-        textArea.setHTML(text.toString());
+        textArea.setText(text);
       }
     }));
 

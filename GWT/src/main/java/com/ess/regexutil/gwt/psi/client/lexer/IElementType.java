@@ -30,4 +30,8 @@ public class IElementType {
     return counter;
   }
 
+  @Override
+  public String toString() {
+    return myDescription;
+  }
 }

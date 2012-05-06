@@ -39,6 +39,8 @@ public abstract class TokenSet {
 
       @Override
       public boolean contains(IElementType element) {
+        if (element == null) return false;
+
         int index = element.getIndex();
         return index < m.length && m[index];
       }
