@@ -6,7 +6,7 @@
     <macrodef name="flex">
         <attribute name="flexfile"/>
         <attribute name="destdir"/>
-        <attribute name="skeleton" default="${basedir}/lexer/idea-flex.skeleton"/>
+        <attribute name="skeleton" default="${basedir}/lexer/flex.skeleton"/>
         <sequential>
             <delete dir="${out.dir}"/>
             <mkdir dir="${out.dir}"/>
