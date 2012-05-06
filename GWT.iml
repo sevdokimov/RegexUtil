@@ -5,11 +5,8 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="128" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://$USER_HOME$/opt/gwt-2.2.0" />
+        <setting name="gwtSdkUrl" value="file://$USER_HOME$/opt/gwt-2.4.0" />
         <setting name="webFacet" value="Web" />
-        <packaging>
-          <module name="com.ess.regexutil.gwt.RegexEditor" path="/RegexEditor" />
-        </packaging>
       </configuration>
     </facet>
     <facet type="web" name="Web">
@@ -31,7 +28,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="core" />
-    <orderEntry type="library" name="gwt-user" level="project" />
+    <orderEntry type="library" name="gwt-user (2)" level="project" />
   </component>
 </module>
 
