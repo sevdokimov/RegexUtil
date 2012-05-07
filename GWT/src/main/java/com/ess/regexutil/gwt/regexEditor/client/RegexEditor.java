@@ -27,7 +27,7 @@ public class RegexEditor implements EntryPoint {
     final TextBox regex = new TextBox();
     panel.add(regex);
 
-    final RichTextArea textArea = new RichTextArea();
+    final TextArea textArea = new TextArea();
     panel.add(textArea);
 
     panel.add(new Button("Parse", new ClickHandler() {
@@ -54,6 +54,32 @@ public class RegexEditor implements EntryPoint {
         textArea.setText(text);
       }
     }));
+
+
+    final TextBox testedText = new TextBox();
+    panel.add(testedText);
+
+    final Label matchingResult = new Label();
+
+    panel.add(new Button("Match", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        String regexText = regex.getText();
+
+        String text;
+
+        try {
+          RegExp r = RegExp.compile(regexText);
+          text = r.test(testedText.getText()) ? "True" : "False";
+        }
+        catch (Exception e) {
+          text = e.getMessage();
+        }
+
+        matchingResult.setText(text);
+      }
+    }));
+
+    panel.add(matchingResult);
 
     RootPanel.get("slot1").add(panel);
   }

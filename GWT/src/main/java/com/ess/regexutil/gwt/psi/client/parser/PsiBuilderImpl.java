@@ -250,6 +250,7 @@ public class PsiBuilderImpl implements PsiBuilder {
     MarkerImpl marker = new MarkerImpl(myCurrentLexeme);
     addToEnd(marker);
     CloseMarker closeMarker = new CloseMarker(new ErrorPsiElement(messageText), marker);
+    marker.myCloseMarker = closeMarker;
     addToEnd(closeMarker);
   }
 
