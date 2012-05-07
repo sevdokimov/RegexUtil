@@ -10,8 +10,6 @@ import java.util.List;
  */
 public abstract class PsiElement {
 
-  protected static int counter = 1;
-
   protected PsiElement parent;
   protected PsiElement next;
   protected PsiElement prev;
@@ -24,12 +22,23 @@ public abstract class PsiElement {
     this.type = type;
   }
 
+  public int getEnd() {
+    return getIndex() + getLength();
+  }
+
+  public PsiFile getFile() {
+    return parent.getFile();
+  }
+
   public int getIndex() {
     if (cachedIndex == -1) {
-      int res = parent == null ? 0 : parent.getIndex();
+      int res;
 
       if (prev != null) {
-        res += prev.getIndex() + prev.getLength();
+        res = prev.getIndex() + prev.getLength();
+      }
+      else {
+        res = parent.getIndex();
       }
 
       cachedIndex = res;
@@ -85,6 +94,10 @@ public abstract class PsiElement {
     }
 
     return res;
+  }
+
+  public void highlight(StyleData styleData) {
+
   }
 
   @Override

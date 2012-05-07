@@ -15,12 +15,12 @@
  */
 package com.ess.regexutil.gwt.regexEditor.client.lexer;
 
-import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
+import com.ess.regexutil.gwt.psi.client.TextStyle;
 import com.ess.regexutil.gwt.psi.client.lexer.IElementType;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 
 public interface RegExpTT {
-    IElementType NUMBER = new IElementType("NUMBER");
+    IElementType NUMBER = new IElementType("NUMBER", TextStyle.foregroundStyle(0x0000FF));
     IElementType NAME = new IElementType("NAME");
     IElementType COMMA = new IElementType("COMMA");
 

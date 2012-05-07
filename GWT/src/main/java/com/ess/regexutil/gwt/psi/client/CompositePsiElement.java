@@ -55,4 +55,11 @@ public class CompositePsiElement extends PsiElement {
   public PsiElement getLastChild() {
     return lastChild;
   }
+
+  @Override
+  public void highlight(StyleData styleData) {
+    for (PsiElement e = getFirstChild(); e != null; e = e.getNext()) {
+      e.highlight(styleData);
+    }
+  }
 }

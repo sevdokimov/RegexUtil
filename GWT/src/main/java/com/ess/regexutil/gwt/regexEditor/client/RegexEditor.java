@@ -2,7 +2,6 @@ package com.ess.regexutil.gwt.regexEditor.client;
 
 import com.ess.regexutil.gwt.psi.client.PsiFile;
 import com.ess.regexutil.gwt.psi.client.Utils;
-import com.ess.regexutil.gwt.psi.client.lexer.ElementTypes;
 import com.ess.regexutil.gwt.psi.client.lexer.TokenSet;
 import com.ess.regexutil.gwt.psi.client.parser.PsiBuilderImpl;
 import com.ess.regexutil.gwt.psi.client.parser.PsiParser;
@@ -24,7 +23,9 @@ public class RegexEditor implements EntryPoint {
   public void onModuleLoad() {
     VerticalPanel panel = new VerticalPanel();
 
-    final TextBox regex = new TextBox();
+    final RichTextArea regex = new RichTextArea();
+    new RegexHighlighter(regex);
+
     panel.add(regex);
 
     final TextArea textArea = new TextArea();
@@ -52,6 +53,13 @@ public class RegexEditor implements EntryPoint {
         }
 
         textArea.setText(text);
+      }
+    }));
+
+    panel.add(new Button("set HTML", new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        String t = textArea.getText();
+        regex.setHTML(t);
       }
     }));
 
