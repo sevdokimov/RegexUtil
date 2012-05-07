@@ -32,17 +32,18 @@ public class CompositePsiElement extends PsiElement {
   }
 
   public void addElement(PsiElement element) {
-    element.prev = lastChild;
     element.parent = this;
+    element.prev = lastChild;
     element.next = null;
 
     if (lastChild != null) {
       lastChild.next = element;
     }
     else {
-      lastChild = element;
       firstChild = element;
     }
+
+    lastChild = element;
   }
 
   @Override
