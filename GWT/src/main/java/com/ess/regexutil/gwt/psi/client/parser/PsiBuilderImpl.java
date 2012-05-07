@@ -57,7 +57,7 @@ public class PsiBuilderImpl implements PsiBuilder {
   private void cacheLexemes() {
     int approxLexCount = myText.length();
 
-    myLexStarts = new int[approxLexCount];
+    myLexStarts = new int[approxLexCount + 1];
     myLexTypes = new IElementType[approxLexCount];
 
     myLexer.start(myText);
@@ -67,7 +67,7 @@ public class PsiBuilderImpl implements PsiBuilder {
       IElementType type = myLexer.getTokenType();
       if (type == null) break;
 
-      if (i >= myLexTypes.length - 1) {
+      if (i == myLexTypes.length) {
         resizeLexemes(i * 3 / 2);
       }
       int tokenStart = myLexer.getTokenStart();
