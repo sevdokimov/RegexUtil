@@ -75,7 +75,7 @@
         document.write(comment)
         document.write('</comment></object>')
     } else {
-        document.write('<embed type="application/x-java-applet;version=1.5"CODE="com.ess.regexutil.applet.RegexApplet"ARCHIVE="regexApplet.jar"WIDTH="100%"HEIGHT="470px"scriptable="false"MAYSCRIPT="true"name="JA"pluginspage="http://java.sun.com/j2se/1.5.0/download.html"')
+        document.write('<embed type="application/x-java-applet;version=1.5"CODE="com.ess.regexutil.applet.RegexApplet"ARCHIVE="regexApplet.jar"WIDTH="100%"HEIGHT="470px"scriptable="false"MAYSCRIPT="true"name="Regex Tester"pluginspage="http://java.sun.com/j2se/1.5.0/download.html"')
         for (var i = 0; i < paramVal.length; i++) {
             document.write(paramVal[i].name + '="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '"')
         }
