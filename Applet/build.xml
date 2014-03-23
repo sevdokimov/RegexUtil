@@ -20,7 +20,7 @@
         <mkdir dir="${compPath}"/>
 
         <javac srcdir="${basedir}/../RegexUtil/sharedSrc" destdir="${compPath}" target="1.5"/>
-        <javac classpath="${compPath}" srcdir="${basedir}/../SwingContrils/src" destdir="${compPath}" target="1.5"/>
+        <javac classpath="${compPath}" srcdir="${basedir}/../SwingControls/src" destdir="${compPath}" target="1.5"/>
         <javac classpath="${compPath}" srcdir="${basedir}/src" destdir="${compPath}" target="1.5"/>
 
         <copy file="${basedir}/../RegexUtil/sharedSrc/com/ess/regexutil/regexparser/messages.properties"

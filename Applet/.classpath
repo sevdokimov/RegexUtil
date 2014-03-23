@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="proguard.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/SwingContrils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SwingControls"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
