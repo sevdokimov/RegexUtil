@@ -15,8 +15,7 @@ import java.util.Map;
 )
 public class RegexpStateService implements PersistentStateComponent<RegexpStateService.State> {
 
-    private final State stateHolder = new State();
-    private final Map<String, String> state = stateHolder.map;
+    private final Map<String, String> state = new HashMap<String, String>();
     
     private RegexPanel panel;
     
@@ -46,11 +45,23 @@ public class RegexpStateService implements PersistentStateComponent<RegexpStateS
         if (panel != null) {
             panel.saveState(state);
         }
-        return stateHolder;
+
+        State res = new State();
+        res.map.putAll(state);
+
+        for (Map.Entry<String, String> entry : res.map.entrySet()) {
+            entry.setValue(escape(entry.getValue()));
+        }
+        
+        return res;
     }
 
     public void loadState(RegexpStateService.State state) {
         Map<String, String> tmp = new HashMap<String, String>(state.map);
+
+        for (Map.Entry<String, String> entry : tmp.entrySet()) {
+            entry.setValue(unescape(entry.getValue()));
+        }
         
         this.state.clear(); // cleaning of this.state may clean state , so we save state to tmp.
         this.state.putAll(tmp);
@@ -60,6 +71,15 @@ public class RegexpStateService implements PersistentStateComponent<RegexpStateS
         }
     }
 
+    private String escape(String s) {
+        return s.replaceAll("\\|", "||").replaceAll("\\$", "|d");
+    }
+
+    private String unescape(String s) {
+        return s.replace("|d", "$").replaceAll("\\|\\|", "|");
+    }
+    
+    
     public static class State {
         public Map<String, String> map = new HashMap<String, String>();
     }
