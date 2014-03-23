@@ -26,6 +26,9 @@ import com.ess.util.EventListener;
 
 public class RegexPanel extends JPanel {
 
+    public static final String STATE_REGEX = "regex";
+    public static final String STATE_MODE = "mode";
+
     private CopyPasteAdapter copyPasteAdapter = DefaultCopyPasteAdapter.getInstance();
 
     private Flags flags;
@@ -202,8 +205,8 @@ public class RegexPanel extends JPanel {
     }
 
     public void saveState(Map<String, String> res) {
-        res.put("mode", String.valueOf(tab.getSelectedIndex()));
-        res.put("regex", regexAdapter.getText());
+        res.put(STATE_MODE, String.valueOf(tab.getSelectedIndex()));
+        res.put(STATE_REGEX, regexAdapter.getText());
         res.put("flags", String.valueOf(flags.getFlags()));
         currentSelect.saveState(res);
     }

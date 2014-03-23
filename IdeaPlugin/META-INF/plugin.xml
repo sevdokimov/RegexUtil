@@ -23,11 +23,11 @@
 
     <depends>com.intellij.modules.lang</depends>
     
-    <project-components>
-        <component>
-            <implementation-class>com.ess.regexutil.ideaplugin.RegexUtilComponent</implementation-class>
-            <skipForDefaultProject/>
-        </component>
-    </project-components>
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Regex Tester" anchor="bottom" secondary="false"
+                    factoryClass="com.ess.regexutil.ideaplugin.RegexpToolWindowFactory" />
+        
+        <projectService serviceImplementation="com.ess.regexutil.ideaplugin.RegexpStateService" />
+    </extensions>
 
 </idea-plugin>
