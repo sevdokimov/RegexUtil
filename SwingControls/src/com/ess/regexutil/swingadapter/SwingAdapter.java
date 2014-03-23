@@ -130,6 +130,8 @@ public class SwingAdapter implements ITextEditorAdapter {
 			};
 		}
 		
+        editor.setBackground(Color.WHITE);
+
 		StyledDocument doc = editor.getStyledDocument(); 
 		Style defStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);
 		placeholderStyle = doc.addStyle(null, defStyle);
