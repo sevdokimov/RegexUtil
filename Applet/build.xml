@@ -27,6 +27,11 @@
               todir="${compPath}/com/ess/regexutil/regexparser"/>
 
         <jar jarfile="${jar}">
+            <manifest>
+                <attribute name="Permissions" value="sandbox"/>
+                <attribute name="Application-Name" value="Regex Tester"/>
+            </manifest>
+            
             <fileset dir="${compPath}">
             </fileset>
         </jar>
