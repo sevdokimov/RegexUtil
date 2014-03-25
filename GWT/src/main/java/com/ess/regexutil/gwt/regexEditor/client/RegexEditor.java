@@ -11,6 +11,7 @@ import com.ess.regexutil.gwt.regexEditor.client.parser.RegExpParser;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.*;
 
@@ -73,11 +74,18 @@ public class RegexEditor implements EntryPoint {
       public void onClick(ClickEvent event) {
         String regexText = regex.getText();
 
-        String text;
+        String text = "";
 
         try {
-          RegExp r = RegExp.compile(regexText);
-          text = r.test(testedText.getText()) ? "True" : "False";
+          RegExp r = RegExp.compile(regexText, "g");
+
+          do {
+            MatchResult matchResult = r.exec(testedText.getText());
+            if (matchResult == null) break;
+
+            text += matchResult.getGroup(0) + "\n";
+          } while (true);
+          
         }
         catch (Exception e) {
           text = e.getMessage();
