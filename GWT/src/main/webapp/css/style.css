@@ -16,10 +16,11 @@ body {
 }
 
 #tBar .in {
-    border: solid 1px black;
-    padding:3px 7px;
+    padding: 5px 10px;
     font-weight:bold;
     text-align: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 }
 
 #tBar a {
