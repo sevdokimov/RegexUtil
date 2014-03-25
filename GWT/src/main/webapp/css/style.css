@@ -15,7 +15,7 @@ body {
     WIDTH: 170px
 }
 
-#tBar .in {
+#tBar a div {
     padding: 5px 10px;
     font-weight:bold;
     text-align: center;
@@ -31,7 +31,7 @@ body {
 }
 
 
-#tBar a:hover .in {
+#tBar a:hover div {
     background:#ececec;
 }
 
