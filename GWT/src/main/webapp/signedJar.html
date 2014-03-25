@@ -59,7 +59,7 @@
     }
 
     var comment = '<div style="color:red;font-size:18px;width:600px;display:none;margin:40px 0">Your browser cannot run java-applet. Possibe Java Virtual Machine is not installed on your computer, you can install it from <a href="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads</a></div>'
-    if ($.browser.msie) {
+    if (navigator.userAgent.indexOf('MSIE') !== -1) {
         document.write('<object name=JA classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" codebase="http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=1,5,0,0" WIDTH="100%" HEIGHT="470px"><PARAM NAME=CODE VALUE="com.ess.regexutil.applet.RegexApplet"><PARAM NAME=ARCHIVE VALUE="s_regexApplet.jar"><param name="type" value="application/x-java-applet;version=1.5"><param name="scriptable" value="false"><PARAM NAME="MAYSCRIPT" VALUE="true">')
         for (var i = 0; i < paramVal.length; i++) {
             document.write('<param name="' + paramVal[i].name + '" value="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '">')
