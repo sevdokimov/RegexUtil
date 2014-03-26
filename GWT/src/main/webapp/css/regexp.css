@@ -1,0 +1,25 @@
+.regexEditor {
+    
+}
+
+.ace_error {
+    color: #f00;
+}
+
+.ace_openBracket, .ace_closedBracket, .ace_comma, .ace_symbolBracket, .ace_multiplexer, .ace_dote, .ace_orSymbol, .ace_specSymbol {
+    font-weight: bold;
+    color: #000000;
+}
+
+.ace_characterClassEscape {
+    color: #009600;
+}
+
+.ace_escapeSymbol {
+    color: #ccc;
+}
+
+.ace_defText, .ace_escapedSymbol {
+    color: #555;
+}
+
