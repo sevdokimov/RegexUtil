@@ -91,7 +91,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
              afterAtom: [
                { include: "#term" },
 
-               { token: 'quantifier.specSymbol',
+               { token: 'quantifier',
                  regex: /[*+?]|\{\d+(?:,\d*)?\}\??/,
                  next: "start"
                },
