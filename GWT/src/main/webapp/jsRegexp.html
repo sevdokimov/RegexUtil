@@ -23,12 +23,12 @@
 
 <script type="text/javascript" src="js/menu.js"></script>
 
-<span>Regular expression:</span>
+<span>Regular expression (JavaScript 2.0):</span>
 
-<div id="regexpEditor" style="height: 70px;">(\d+)</div>
+<div id="regexpEditor" class="myEditor" style="height: 70px;">(\d+)</div>
 
-Text:
-<div id="textEditor" style="height: 500px;width: 500px;font-size: 14px">123 456</div>
+<span>Text to find:</span>
+<div id="textEditor" class="myEditor" style="height: 600px;width: 500px;font-size: 14px">123 456</div>
 
 
 <script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -50,8 +50,13 @@ Text:
 
 
     var textEditor = ace.edit("textEditor");
-    textEditor.setTheme("ace/theme/chrome");
-    textEditor.getSession().setMode("ace/mode/text");
+    textEditor.setOptions({
+                              highlightActiveLine: false,
+                              showGutter: false,
+                              showPrintMargin: false,
+                              theme: "ace/theme/chrome",
+                              mode: "ace/mode/text"
+                          })
 
     installRegexpFindDependency(regexpEditor, textEditor)
 </script>
