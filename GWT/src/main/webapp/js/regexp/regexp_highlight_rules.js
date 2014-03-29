@@ -31,11 +31,11 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  next: "afterAtom"
                },
 
-               { token: ['decEscape', 'controlLetter', 'controlEscape'],
+               { token: ['numEsc', 'controlLetter', 'controlEsc'],
                  regex: /(\\(?:0[1-9][0-9]*|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])/,
                  next: "afterAtom"
                },
-               { token: 'characterClassEscape',
+               { token: 'charClassEsc',
                  regex: /\\[sSdDwW]/,
                  next: "afterAtom"
                },

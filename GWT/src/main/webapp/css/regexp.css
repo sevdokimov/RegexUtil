@@ -7,11 +7,11 @@
     color: #000000;
 }
 
-.ace_decEscape, .ace_controlLetter, .ace_controlEscape {
+.ace_numEsc, .ace_controlLetter, .ace_controlEsc {
     color: #000000;
 }
 
-.ace_characterClassEscape {
+.ace_charClassEsc {
     color: #009600;
 }
 
