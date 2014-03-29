@@ -32,3 +32,6 @@
     z-index: 5;
 }
 
+.ace_hidden-cursors .ace_cursor {
+    visibility: hidden;
+}
