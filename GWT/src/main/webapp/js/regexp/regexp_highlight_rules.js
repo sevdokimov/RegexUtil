@@ -43,6 +43,10 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  regex: /\\[fnrtv]/,
                  next: "afterAtom"
                },
+               { token: ['escapeSymbol', 'escapedSymbol'],
+                 regex: /(\\)([^a-z0-9])/,
+                 next: "afterAtom"
+               },
 
                { token: "defText",
                  regex: /[^\^\$\\\.\|\*\+\?\(\)\[\]\{\}\/]/,
