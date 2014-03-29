@@ -2,8 +2,12 @@
     color: #f00;
 }
 
-.ace_openBracket, .ace_closedBracket, .ace_comma, .ace_symbolBracket, .ace_multiplexer, .ace_dote, .ace_orSymbol, .ace_specSymbol {
+.ace_openBracket, .ace_closedBracket, .ace_comma, .ace_symbolBracket, .ace_multiplexer, .ace_dote, .ace_orSymbol, .ace_specSymbol, .ace_assertion {
     font-weight: bold;
+    color: #000000;
+}
+
+.ace_decEscape, .ace_controlLetter, .ace_controlEscape {
     color: #000000;
 }
 
