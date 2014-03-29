@@ -19,6 +19,16 @@
     color: #555;
 }
 
-.matched {
-    background: #00f;
+.matched1 {
+    background: #C8C8FF;
 }
+
+.matched2 {
+    background: #C8C8C8;
+}
+
+.ace_marker-layer .matched1, .ace_marker-layer .matched2 {
+    position: absolute;
+    z-index: 5;
+}
+
