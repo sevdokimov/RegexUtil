@@ -32,7 +32,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                },
 
                { token: 'controlLetter',
-                 regex: /\\c[a-z]/i,
+                 regex: /\\c[a-zA-Z]/,
                  next: "afterAtom"
                },
                { token: 'characterClassEscape',
@@ -44,7 +44,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  next: "afterAtom"
                },
                { token: ['escapeSymbol', 'escapedSymbol'],
-                 regex: /(\\)([^a-z0-9])/,
+                 regex: /(\\)([^a-zA-Z0-9])/,
                  next: "afterAtom"
                },
 
