@@ -1,4 +1,4 @@
-function testRegexHighlighting(text, tokens) {
+function testRegexHighlighting(text, tokens, ignoreCompilationIncompatibility) {
   var Mode = require("ace/mode/regexp").Mode;
 
   var m = new Mode()
@@ -32,7 +32,7 @@ function testRegexHighlighting(text, tokens) {
     }
   }
 
-  if (sucess) {
+  if (sucess && !ignoreCompilationIncompatibility) {
     var failedRegexCompilation
     
     try {
@@ -44,7 +44,16 @@ function testRegexHighlighting(text, tokens) {
     }
     
     if (failedRegexCompilation != hasErrorToken) {
-      document.test_errors += "failedRegexCompilation == hasErrorToken<br><br>"
+      var message
+      
+      if (failedRegexCompilation) {
+        message = "Uncompiled regex shown without errors: " + text + "<br><br>"
+      }
+      else {
+        message = "Correct regex shown with errors: " + text + "<br><br>"
+      }
+      
+      document.test_errors += message
     }
   }
   
@@ -52,7 +61,10 @@ function testRegexHighlighting(text, tokens) {
     var actualTokens = ""
     
     for (i = 0; i < t.length; i++) {
-      actualTokens += ", " + t[i].type + '#' + t[i].value
+      if (actualTokens.length > 0) {
+        actualTokens += ", "
+      }
+      actualTokens += t[i].type + '#' + t[i].value
     }
 
     var errorMsg = "<table class='testError'>" +

@@ -7,7 +7,7 @@
     color: #000000;
 }
 
-.ace_numEsc, .ace_controlLetter, .ace_controlEsc {
+.ace_numEsc, .ace_controlLetter, .ace_controlEsc, .ace_charClassRange {
     color: #000000;
 }
 
@@ -19,7 +19,7 @@
     color: #ccc;
 }
 
-.ace_defText, .ace_escapedSymbol {
+.ace_defText, .ace_escapedSymbol, .ace_charClassAtom {
     color: #555;
 }
 

@@ -71,6 +71,16 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                { token: 'closedBracket',
                  regex: /\)/,
                  next: "afterAtom"
+               },
+                 
+               { token: "error",
+                 regex: /\[\^?\]/,
+                 next: "afterAtom"
+               },
+                 
+               { token: "charClassStart",
+                 regex: /\[\^?/,
+                 next: "charClassStart"
                }
              ],
 
@@ -82,6 +92,11 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  next: "start"
                },
 
+               {
+                 token: 'error.incorrectEsc',
+                 regex: /\\./
+               },
+                 
                {
                  token: 'error',
                  regex: /./
@@ -97,8 +112,47 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                },
 
                {
+                 token: 'error.incorrectEsc',
+                 regex: /\\./
+               },
+
+               {
                  token: 'error',
                  regex: /./
+               }
+             ],
+
+             "#charClassAtom": [
+               { token: 'charClassEsc',
+                 regex: /\\[sSdDwW]/,
+                 next: "charClassStart"
+               },
+
+               { token: ['charClassAtom', 'numEsc', 'controlLetter', 'controlEsc', 'escapeSymbol', 'escapedSymbol'],
+                 regex: /([^\]\\])|(\\(?:[0-9]+|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])|(\\)(.)/,
+                 next: "charClassAfterAtom"
+               },
+
+               { token: 'charClassEnd',
+                 regex: /]/,
+                 next: "afterAtom"
+               }
+             ]  ,
+             
+             charClassStart: [
+               {
+                 include: "#charClassAtom"
+               }
+             ],
+             
+             charClassAfterAtom: [
+               { token: ['charClassRange', 'charClassAtom', 'numEsc', 'controlLetter', 'controlEsc', 'escapeSymbol', 'escapedSymbol'],
+                 regex: /(-)(?:([^\]\\])|(\\(?:[0-9]+|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])|(\\)([^sSdDwW]))/,
+                 next: "charClassStart"
+               },
+
+               {
+                 include: "#charClassAtom"
                }
              ]
            }
