@@ -1,7 +1,7 @@
 
 body {
     margin:30px 15px 0 15px;
-    /*font-family: sans-serif;*/
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 #tBar {
@@ -12,11 +12,10 @@ body {
 #tBar .out {
     float:left;
     margin:0 10px;
-    WIDTH: 170px
 }
 
 #tBar a div {
-    padding: 5px 10px;
+    padding: 5px 20px;
     font-weight:bold;
     text-align: center;
     border-top-left-radius: 6px;
