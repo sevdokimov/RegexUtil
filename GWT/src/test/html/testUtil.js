@@ -1,34 +1,59 @@
 function testRegexHighlighting(text, tokens) {
-  testHighlighting("ace/mode/regexp", text, tokens)
-}
+  var Mode = require("ace/mode/regexp").Mode;
 
-function testHighlighting(mode, text, tokens) {
-    var Mode = require(mode).Mode;
-
-    var m = new Mode()
+  var m = new Mode()
 
   var Tokenizer = require("ace/tokenizer").Tokenizer;
-    var tokenizer = new Tokenizer(new m.HighlightRules().$rules);
+  var tokenizer = new Tokenizer(new m.HighlightRules().$rules);
 
-    var t = tokenizer.getLineTokens(text).tokens
+  var t = tokenizer.getLineTokens(text).tokens
 
-    var sucess = tokens.length == t.length
+  var sucess = tokens.length == t.length
 
-    if (sucess) {
-        for (var i = 0; i < tokens.length; i++) {
-            var tmpl = tokens[i]
-            var idx = tmpl.indexOf('#')
+  var hasErrorToken = false
+  
+  if (sucess) {
+    for (var i = 0; i < tokens.length; i++) {
+      var tmpl = tokens[i]
 
-            if (idx == -1) {
-                sucess = (t[i].type == tmpl || t[i].value == tmpl);
-            }
-            else {
-                sucess = (t[i].type = tmpl.substr())
-            }
+      if (t[i].type == 'error') {
+        hasErrorToken = true
+      }
 
-            if (!sucess) break
-        }
+      var idx = tmpl.indexOf('#')
+      if (idx == -1) {
+        sucess = (t[i].type == tmpl || t[i].value == tmpl);
+      }
+      else {
+        sucess = (t[i].type == tmpl.substring(0, idx) && t[i].value == tmpl.substring(idx + 1))
+      }
+
+      if (!sucess) break
     }
+  }
 
-    assert(z)
+  if (sucess) {
+    var failedRegexCompilation
+    
+    try {
+      new RegExp(text)
+      failedRegexCompilation = false
+    }
+    catch (e) {
+      failedRegexCompilation = true
+    }
+    
+    if (failedRegexCompilation != hasErrorToken) {
+      document.test_errors += "failedRegexCompilation == hasErrorToken<br><br>"
+    }
+  }
+  
+  if (!sucess) {
+    document.test_errors += "Incorrect parsing: <br>expexct: " + tokens.join(", ") + "<br>actual:"
+    for (i = 0; i < t.length; i++) {
+      document.test_errors += ", " + t[i].type + '#' + t[i].value
+    }
+    
+    document.test_errors += "<br><br>"
+  }
 }

@@ -18,9 +18,17 @@
 <script type="text/javascript" src="../../main/webapp/js/common.js" charset="utf-8"></script>
 
 <script type="text/javascript">
+    document.test_errors = ""
+    
     runTests()
     
-    document.write("<div style='color: green;font-weight: bold;font-size: 24px'>Success!!!</div>")
+    if (document.test_errors) {
+        document.write(document.test_errors)
+    }
+    else {
+        document.write("<div style='color: green;font-weight: bold;font-size: 24px'>Success!!!</div>")
+    }
+    
 </script>
 
 
