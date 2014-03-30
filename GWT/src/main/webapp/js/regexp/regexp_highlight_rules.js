@@ -45,7 +45,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                },
 
                { token: "defText",
-                 regex: /[^\^\$\\\.\|\*\+\?\(\)\[\]\{\}\/]/,
+                 regex: /[^\^\$\\\.\|\*\+\?\(\)\[\{\/]/,
                  next: "afterAtom"
                }
              ],

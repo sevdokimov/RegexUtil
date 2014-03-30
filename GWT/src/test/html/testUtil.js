@@ -49,11 +49,28 @@ function testRegexHighlighting(text, tokens) {
   }
   
   if (!sucess) {
-    document.test_errors += "Incorrect parsing: <br>expexct: " + tokens.join(", ") + "<br>actual:"
-    for (i = 0; i < t.length; i++) {
-      document.test_errors += ", " + t[i].type + '#' + t[i].value
-    }
+    var actualTokens = ""
     
-    document.test_errors += "<br><br>"
+    for (i = 0; i < t.length; i++) {
+      actualTokens += ", " + t[i].type + '#' + t[i].value
+    }
+
+    var errorMsg = "<table class='testError'>" +
+                   "<tr>" +
+                   "  <td>Regexp</td>" +
+                   "  <td>" + text + "</td>" +
+                   "</tr>" +
+                   "<tr>" +
+                   "  <td>Expected tokens</td>" +
+                   "  <td>" + tokens.join(", ") + "</td>" +
+                   "</tr>" +
+                   "<tr>" +
+                   "  <td>Actual tokens</td>" +
+                   "  <td>" + actualTokens + "</td>" +
+                   "</tr>" +
+                   "</table>" +
+                   "<br><br>"
+    
+    document.test_errors += errorMsg
   }
 }

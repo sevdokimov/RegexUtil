@@ -1,0 +1,8 @@
+.testError td {
+    border: 1px solid;
+    padding: 3px;
+}
+
+.testError {
+    border-collapse: collapse;
+}
