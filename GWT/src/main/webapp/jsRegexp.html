@@ -23,11 +23,15 @@
 
 <script type="text/javascript" src="js/menu.js"></script>
 
+<div style="font-size: small;margin-bottom: 20px">
+    This is sandbox to test JavaScript regular expression. To test JAVA regular expression you can use <a href="signedJar.html">java-applet</a>
+</div>
+
 <span>Regular expression (JavaScript 2.0):</span>
 
 <div id="regexpEditor" class="myEditor" style="height: 70px;">(\d+)</div>
 
-<span>Text to find:</span>
+<span>Text:</span>
 <div id="textEditor" class="myEditor" style="height: 600px;width: 500px;font-size: 14px">123 456</div>
 
 
@@ -59,6 +63,16 @@
                           })
 
     installRegexpFindDependency(regexpEditor, textEditor)
+</script>
+
+<script type="text/javascript">
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+    var pageTracker = _gat._getTracker("UA-4814721-1");
+    pageTracker._initData();
+    pageTracker._trackPageview();
 </script>
 
 </body>
