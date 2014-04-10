@@ -19,7 +19,7 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
       var odd = true
       
       while (r = regex.exec(text)) {
-        if (regex.global && regex.lastIndex == 0) {
+        if (r[0].length == 0) {
           break // regexp is empty
         }
         
