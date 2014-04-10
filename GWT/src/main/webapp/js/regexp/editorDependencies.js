@@ -4,13 +4,9 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
   var marker = {
     id: 'regexTextFindMarked',
 
-    setRegexp: function (regExp) {
-      this.regExp = regExp;
-      this.cache = [];
-    },
-
     update: function (html, markerLayer, session, config) {
-      if (!this.regExp) return
+      var regex = regexpEditor.regex
+      if (!regex) return
 
       var start = config.firstRow, end = config.lastRow;
 
@@ -18,17 +14,17 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
 
       var r;
 
-      this.regExp.lastIndex = 0
+      regex.lastIndex = 0
       
       var odd = true
       
-      while (r = this.regExp.exec(text)) {
-        if (this.regExp.lastIndex == 0) {
+      while (r = regex.exec(text)) {
+        if (regex.global && regex.lastIndex == 0) {
           break // regexp is empty
         }
         
         var startPos = session.getDocument().indexToPosition(r.index)
-        var endPos = session.getDocument().indexToPosition(this.regExp.lastIndex)
+        var endPos = session.getDocument().indexToPosition(r.index + r[0].length)
         
         var range = Range.fromPoints(startPos, endPos)
         
@@ -38,19 +34,20 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
                                          config);
         
         odd = !odd
+
+        if (!regex.global) break
       }
     }
   }
 
-  textEditor.my_marker = marker
   textEditor.getSession().addDynamicMarker(marker)
 
   textEditor.on("change", function() {
     textEditor.onChangeBackMarker()
   })
 
-  regexpEditor.on("change", function () {
-    regexChanged(regexpEditor, textEditor)
+  regexpEditor.addRegexChangeListener(function () {
+    textEditor.onChangeBackMarker()
   })
 
   //regexpEditor.getSession().selection.on("changeSelection", function () {
@@ -70,32 +67,5 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
   //    regexEditorStateMayBeChanged(regexpEditor, textEditor)
   //  }
   //})
-
-  regexChanged(regexpEditor, textEditor)
-}
-
-function regexChanged(regexpEditor, textEditor) {
-  //var newText = regexpEditor.getValue()
-  //if (newText != regexpEditor.my_old_text) {
-  //  regexpEditor.my_old_text = newText
-  //  hasChanges = true
-  //}
-  //var newSelRange = regexpEditor.getSelectionRange()
-  //if (hasChanges || !regexpEditor.my_old_sel_range || !newSelRange.isEqual(regexpEditor.my_old_sel_range)) {
-  //  regexpEditor.my_old_sel_range = newSelRange
-  //  hasChanges = true
-  //}
-  //if (!hasChanges) return;
-  // State was changed
-  var regex = null;
-  try {
-    regex = new RegExp(regexpEditor.getValue(), "g");
-  }
-  catch (e) {
-  }
-  
-  textEditor.my_marker.setRegexp(regex)
   textEditor.onChangeBackMarker()
-  
-  console.log(regexpEditor.getValue())
 }

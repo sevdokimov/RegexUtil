@@ -10,3 +10,8 @@
     border: 2px solid;
     background: #f6f6f6;
 }
+
+
+#flags label {
+    padding-left: 10px;
+}

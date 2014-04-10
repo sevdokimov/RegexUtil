@@ -29,7 +29,15 @@
 
 <span>Regular expression (JavaScript 2.0):</span>
 
+<div>
 <div id="regexpEditor" class="myEditor" style="height: 70px;">(\d+)</div>
+  <div id="flags" align="right">
+    <label><input flagValue="i" type="checkbox"/>Case insensitive (<b>i</b>)</label>
+    <label><input flagValue="g" checked="checked" type="checkbox"/>Global (<b>g</b>)</label>
+    <label><input flagValue="m" type="checkbox"/>Multi-line (<b>m</b>)</label>
+  </div>
+</div>
+
 
 <span>Text:</span>
 <div id="textEditor" class="myEditor" style="height: 600px;width: 500px;font-size: 14px">123 456</div>
@@ -40,6 +48,7 @@
 <script src="js/regexp/regexp_highlight_rules.js" type="text/javascript" charset="utf-8"></script>
 
 <script src="js/regexp/editorDependencies.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/regexEditorApi.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript">
     var regexpEditor = ace.edit("regexpEditor");
@@ -52,6 +61,8 @@
                                 mode: "ace/mode/regexp"
                             })
 
+    installRegexEditorApi(regexpEditor)
+    installFlagsCheckboxListener(regexpEditor, $('#flags input'))
 
     var textEditor = ace.edit("textEditor");
     textEditor.setOptions({
