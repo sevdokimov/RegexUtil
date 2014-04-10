@@ -32,9 +32,15 @@
 <div>
 <div id="regexpEditor" class="myEditor" style="height: 70px;">(\d+)</div>
   <div id="flags" align="right">
-    <label><input flagValue="i" type="checkbox"/>Case insensitive (<b>i</b>)</label>
-    <label><input flagValue="g" checked="checked" type="checkbox"/>Global (<b>g</b>)</label>
-    <label><input flagValue="m" type="checkbox"/>Multi-line (<b>m</b>)</label>
+    <label title="Perform case-insensitive matching">
+      <input flagValue="i" type="checkbox"/>Case insensitive (<b>i</b>)
+    </label>
+    <label title="Perform a global match (find all matches rather than stopping after the first match)">
+      <input flagValue="g" checked="checked" type="checkbox"/>Global (<b>g</b>)
+    </label>
+    <label title="^ and $ will match the beginning/end of lines">
+      <input flagValue="m" type="checkbox"/>Multi-line (<b>m</b>)
+    </label>
   </div>
 </div>
 
