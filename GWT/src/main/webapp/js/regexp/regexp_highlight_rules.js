@@ -5,23 +5,6 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
          var oop = require("../lib/oop");
          var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-         var oneSymbolMap = {
-           '(': "openBracket",
-           ')': 'closedBracket',
-           '.': 'dote',
-           '*': 'multiplexer',
-           '|': 'orSymbol'
-         }
-
-         var oneSymbolRegex = "["
-         for (var symbol in oneSymbolMap) {
-           if (!oneSymbolMap.hasOwnProperty(symbol)) continue
-
-           assert(symbol.match(/[^a-zA-Z0-9]/))
-           oneSymbolRegex += '\\' + symbol
-         }
-         oneSymbolRegex += ']'
-
          var RegexpFileHighlightRules = function () {
 
            this.$rules = {
