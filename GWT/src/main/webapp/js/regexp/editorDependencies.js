@@ -27,11 +27,20 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
         var endPos = session.getDocument().indexToPosition(r.index + r[0].length)
         
         var range = Range.fromPoints(startPos, endPos)
-        
-        markerLayer.drawSingleLineMarker(html,
-                                         range.toScreenRange(session),
-                                         odd ? 'matched1' : 'matched2', 
-                                         config);
+
+        if (range.end.row > range.start.row) {
+          markerLayer.drawMultiLineMarker(html,
+                                          range.toScreenRange(session),
+                                          odd ? 'matched1' : 'matched2',
+                                          config);
+          
+        }
+        else {
+          markerLayer.drawSingleLineMarker(html,
+                                           range.toScreenRange(session),
+                                           odd ? 'matched1' : 'matched2',
+                                           config);
+        }
         
         odd = !odd
 
