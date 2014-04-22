@@ -31,7 +31,11 @@
     background: #C8a8FF;
 }
 
-.ace_marker-layer .matched1, .ace_marker-layer .matched2 {
+.matchedBracket {
+    background: #8D9EFC;
+}
+
+.ace_marker-layer .matched1, .ace_marker-layer .matched2, .ace_marker-layer .matchedBracket {
     position: absolute;
     z-index: 5;
 }

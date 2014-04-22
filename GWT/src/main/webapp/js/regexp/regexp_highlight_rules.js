@@ -11,20 +11,24 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
              "#atom": [
                { token: "dote",
                  regex: /\./,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                },
 
                { token: ['numEsc', 'controlLetter', 'controlEsc'],
                  regex: /(\\(?:0[1-9][0-9]*|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])/,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                },
                { token: 'charClassEsc',
                  regex: /\\[sSdDwW]/,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                },
                { token: ['escapeSymbol', 'escapedSymbol'],
                  regex: /(\\)([^a-zA-Z0-9])/,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                },
 
                { token: "defText",
@@ -38,22 +42,26 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
 
                { token: "assertion",
                  regex: /\^|\$|\\b|\\B/,
-                 next: "start"
+                 next: "start",
+                 merge: false
                },
 
                { token: 'orSymbol',
                  regex: /\|/,
-                 next: "start"
+                 next: "start",
+                 merge: false
                },
 
                { token: 'openBracket',
                  regex: /\((?:\?[:=!])?/,
-                 next: "start"
+                 next: "start",
+                 merge: false
                },
 
                { token: 'closedBracket',
                  regex: /\)/,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                },
                  
                { token: "error",
@@ -91,7 +99,8 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
 
                { token: 'quantifier',
                  regex: /[*+?]|\{\d+(?:,\d*)?\}\??/,
-                 next: "start"
+                 next: "start",
+                 merge: false
                },
 
                {
@@ -108,17 +117,20 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
              "#charClassAtom": [
                { token: 'charClassEsc',
                  regex: /\\[sSdDwW]/,
-                 next: "charClassStart"
+                 next: "charClassStart",
+                 merge: false
                },
 
                { token: ['charClassAtom', 'numEsc', 'controlLetter', 'controlEsc', 'escapeSymbol', 'escapedSymbol'],
                  regex: /([^\]\\])|(\\(?:[0-9]+|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])|(\\)(.)/,
-                 next: "charClassAfterAtom"
+                 next: "charClassAfterAtom",
+                 merge: false
                },
 
                { token: 'charClassEnd',
                  regex: /]/,
-                 next: "afterAtom"
+                 next: "afterAtom",
+                 merge: false
                }
              ]  ,
              
@@ -131,7 +143,8 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
              charClassAfterAtom: [
                { token: ['charClassRange', 'charClassAtom', 'numEsc', 'controlLetter', 'controlEsc', 'escapeSymbol', 'escapedSymbol'],
                  regex: /(-)(?:([^\]\\])|(\\(?:[0-9]+|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}))|(\\c[a-zA-Z])|(\\[fnrtv])|(\\)([^sSdDwW]))/,
-                 next: "charClassStart"
+                 next: "charClassStart",
+                 merge: false
                },
 
                {
