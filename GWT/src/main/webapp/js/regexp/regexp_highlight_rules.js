@@ -20,6 +20,13 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  next: "afterAtom",
                  merge: false
                },
+                 
+               { token: 'groupRef',
+                 regex: /\\[1-9][0-9]*/,
+                 next: "afterAtom",
+                 merge: false
+               },
+                 
                { token: 'charClassEsc',
                  regex: /\\[sSdDwW]/,
                  next: "afterAtom",

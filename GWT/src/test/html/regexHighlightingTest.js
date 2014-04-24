@@ -10,6 +10,9 @@ function runTests() {
   testRegexHighlighting("a{2,5}", ["defText#a", "quantifier"])
   testRegexHighlighting("a{2,5", ["defText#a{2,5"])
   
+  testRegexHighlighting("a\\01", ["a", "numEsc"])
+  testRegexHighlighting("a\\1", ["a", "groupRef"])
+  
   testRegexHighlighting("\\d+", ["charClassEsc", "quantifier"])
   
   testRegexHighlighting("+", ["error"])

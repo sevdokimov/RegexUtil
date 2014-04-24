@@ -19,6 +19,10 @@
     color: #ccc;
 }
 
+.ace_groupRef {
+    color: #0000FF;
+}
+
 .ace_defText, .ace_escapedSymbol, .ace_charClassAtom {
     color: #444;
 }
