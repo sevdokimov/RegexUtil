@@ -1,4 +1,15 @@
 function runTests() {
+  testRegexHighlighting("^\\b\\B$", ["assertion#^", "assertion#\\b", "assertion#\\B", "assertion#$"])
+  testRegexHighlighting("a++", ["a", "quantifier", "error"])
+  
+  testRegexHighlighting("a+?", ["a", "quantifier"])
+  
+  testRegexHighlighting("a{}", ["defText#a{}"])
+  testRegexHighlighting("a{2}", ["defText#a", "quantifier"])
+  testRegexHighlighting("a{2,}", ["defText#a", "quantifier"])
+  testRegexHighlighting("a{2,5}", ["defText#a", "quantifier"])
+  testRegexHighlighting("a{2,5", ["defText#a{2,5"])
+  
   testRegexHighlighting("\\d+", ["charClassEsc", "quantifier"])
   
   testRegexHighlighting("+", ["error"])

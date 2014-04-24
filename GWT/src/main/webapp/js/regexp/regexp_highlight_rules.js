@@ -32,7 +32,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                },
 
                { token: "defText",
-                 regex: /[^\^\$\\\.\|\*\+\?\(\)\[\{\/]/,
+                 regex: /[^\^\$\\\.\|\*\+\?\(\)\[\/]/,
                  next: "afterAtom"
                }
              ],
@@ -95,14 +95,14 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
              ],
 
              afterAtom: [
-               { include: "#term" },
-
                { token: 'quantifier',
-                 regex: /[*+?]|\{\d+(?:,\d*)?\}\??/,
+                 regex: /(?:[*+?]|\{\d+(?:,\d*)?\})\??/,
                  next: "start",
                  merge: false
                },
 
+               { include: "#term" },
+                 
                {
                  token: 'error.incorrectEsc',
                  regex: /\\./
