@@ -85,6 +85,8 @@ function installRegexpHighlighter(regexpEditor) {
     },
 
     update: function (html, markerLayer, session, config) {
+      if (!regexpEditor.isFocused()) return
+      
       var cursorPos = session.getSelection().getCursor()
 
       var t = session.getTokenAt(cursorPos.row, cursorPos.column + 1)
@@ -155,6 +157,14 @@ function installRegexpHighlighter(regexpEditor) {
   regexpEditor.getSession().addDynamicMarker(bracketMarker)
 
   regexpEditor.on("change", function() {
+    regexpEditor.onChangeBackMarker()
+  })
+
+  regexpEditor.on("focus", function() {
+    regexpEditor.onChangeBackMarker()
+  })
+
+  regexpEditor.on("blur", function() {
     regexpEditor.onChangeBackMarker()
   })
   
