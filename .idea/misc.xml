@@ -25,13 +25,6 @@
     <option name="LOCALE" />
     <option name="OPEN_IN_BROWSER" value="true" />
   </component>
-  <component name="MavenProjectsManager">
-    <option name="originalFiles">
-      <list>
-        <option value="$PROJECT_DIR$/GWT/pom.xml" />
-      </list>
-    </option>
-  </component>
   <component name="ProjectKey">
     <option name="state" value="git@github.com:sevdokimov/RegexUtil.git" />
   </component>

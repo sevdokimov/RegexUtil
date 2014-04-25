@@ -3,11 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Applet.iml" filepath="$PROJECT_DIR$/Applet.iml" />
-      <module fileurl="file://$PROJECT_DIR$/GWT.iml" filepath="$PROJECT_DIR$/GWT.iml" />
       <module fileurl="file://$PROJECT_DIR$/RegexUtil.iml" filepath="$PROJECT_DIR$/RegexUtil.iml" />
       <module fileurl="file://$PROJECT_DIR$/SwingControls.iml" filepath="$PROJECT_DIR$/SwingControls.iml" />
       <module fileurl="file://$PROJECT_DIR$/core.iml" filepath="$PROJECT_DIR$/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/IdeaPlugin/regexTester.iml" filepath="$PROJECT_DIR$/IdeaPlugin/regexTester.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web/web.iml" filepath="$PROJECT_DIR$/web/web.iml" />
     </modules>
   </component>
 </project>
