@@ -70,6 +70,7 @@ function installFlagsCheckboxListener(regexpEditor, checkboxes) {
 
 function installRegexpHighlighter(regexpEditor) {
   regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarket(regexpEditor))
+  regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
 
   regexpEditor.on("change", function() {
     regexpEditor.onChangeBackMarker()
@@ -168,5 +169,81 @@ function MatchedBracketMarket(regexpEditor) {
                                      'matchedBracket',
                                      config);
 
+  }
+}
+
+function InvalidBracketMarker() {
+  var MyTokenIterator = require("ess/regex/my_token_iterator").MyTokenIterator;
+  var Range = ace.require("ace/range").Range;
+
+  this.update = function (html, markerLayer, session, config) {
+    var itr = new MyTokenIterator(session, 0)
+
+    var openBrackets = []
+
+    var t
+    while ((t = itr.getCurrentToken())) {
+
+      if (t.type == 'charClassStart') {
+        var openBrRow = itr.getCurrentTokenRow()
+        var openBrColumn = itr.getCurrentTokenColumn()
+        var openBrLength = t.value.length
+
+        do {
+          t = itr.stepForward()
+          if (!t) {
+            if (openBrRow >= config.firstRow && openBrRow <= config.lastRow) {
+              var range = new Range(openBrRow, openBrColumn, openBrRow, openBrColumn + openBrLength)
+
+              markerLayer.drawSingleLineMarker(html,
+                                               range.toScreenRange(session),
+                                               'unmatchedBracket',
+                                               config);
+            }
+            break
+          }
+
+          if (t.type == 'charClassEnd') {
+            break
+          }
+        } while (true)
+      }
+      else if (t.type == 'openBracket') {
+        openBrackets.push({
+                            row: itr.getCurrentTokenRow(), 
+                            column: itr.getCurrentTokenColumn(), 
+                            len: t.value.length 
+                          })
+      }
+      else if (t.type == 'closedBracket') {
+        if (openBrackets.length == 0) {
+          markerLayer.drawSingleLineMarker(html,
+                                           new Range(
+                                               itr.getCurrentTokenRow(),
+                                               itr.getCurrentTokenColumn(),
+                                               itr.getCurrentTokenRow(), 
+                                               itr.getCurrentTokenColumn() + t.value.length).toScreenRange(session),
+                                           'unmatchedBracket',
+                                           config);
+        }
+        else {
+          openBrackets.pop()
+        }
+      }
+
+      itr.stepForward()
+    }
+    
+    for (var i = 0; i < openBrackets.length; i++) {
+      var unmatchedBracket = openBrackets[i];
+      markerLayer.drawSingleLineMarker(html,
+                                       new Range(
+                                           unmatchedBracket.row,
+                                           unmatchedBracket.column,
+                                           unmatchedBracket.row,
+                                           unmatchedBracket.column + unmatchedBracket.len).toScreenRange(session),
+                                       'unmatchedBracket',
+                                       config);
+    }
   }
 }
