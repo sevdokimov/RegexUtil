@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="WebContent" default="deploy" basedir=".">
+
+  <loadproperties srcfile="server.properties" />
+  
+    <target name="deploy">
+      <ftp server="${server.url}"
+           userid="${server.login}"
+           password="${server.password}"
+           remotedir="htdocs"
+           passive="yes"
+           depends="true">
+        <fileset dir="content" />
+      </ftp>
+    </target>
+
+</project>
