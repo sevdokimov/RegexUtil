@@ -92,8 +92,6 @@ function MatchedBracketMarket(regexpEditor) {
   var TokenIterator = require('ace/token_iterator').TokenIterator
   var Range = ace.require("ace/range").Range;
 
-  this.id = 'regexBracketHighlighter'
-
   this.openBrackets = ['openBracket', 'charClassStart']
 
   this.parentBracket = {
