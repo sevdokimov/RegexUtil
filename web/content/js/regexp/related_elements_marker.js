@@ -4,6 +4,10 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
   var TokenIterator = require('ace/token_iterator').TokenIterator
   var Range = ace.require('ace/range').Range;
 
+  function isSupportedToken(tokenType) {
+    return tokenType == 'orSymbol'
+  }
+  
   var RelatedElementMarker = function(regexpEditor) {
     this.update = function (html, markerLayer, session, config) {
       if (!regexpEditor.isFocused()) return
@@ -14,14 +18,14 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
 
       var matchBracket
 
-      if (!t || (t.type != 'orSymbol')) {
+      if (!t || (!isSupportedToken(t.type))) {
         if (cursorPos.column == 0) {
           return
         }
 
         t = session.getTokenAt(cursorPos.row, cursorPos.column)
 
-        if (!t || (t.type != 'orSymbol' && t.type )) {
+        if (!t || (!isSupportedToken(t.type))) {
           return
         }
       }
@@ -125,6 +129,9 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
                          new Range(lastOr.row, markerStart, itr.getCurrentTokenRow(), markerEnd),
                          session, 'relatedToken', config)
         }
+      }
+      else {
+        assert(false)
       }
     }
   };
