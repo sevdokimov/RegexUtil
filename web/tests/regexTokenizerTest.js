@@ -4,11 +4,11 @@ function runTokenizerTests() {
   
   testRegexHighlighting("a+?", ["a", "quantifier"])
   
-  testRegexHighlighting("a{}", ["defText#a{}"])
+  testRegexHighlighting("a{}", ["defText#a", "defText#{", "defText#}"])
   testRegexHighlighting("a{2}", ["defText#a", "quantifier"])
   testRegexHighlighting("a{2,}", ["defText#a", "quantifier"])
   testRegexHighlighting("a{2,5}", ["defText#a", "quantifier"])
-  testRegexHighlighting("a{2,5", ["defText#a{2,5"])
+  testRegexHighlighting("a{2,5", ["defText#a", "{", "2", ",", "5"])
   
   testRegexHighlighting("a\\01", ["a", "numEsc"])
   testRegexHighlighting("a\\1", ["a", "groupRef"])
@@ -20,10 +20,10 @@ function runTokenizerTests() {
   testRegexHighlighting("\\b+", ["assertion", "error"])
   testRegexHighlighting("(?:\\b)", ["openBracket", "assertion", "closedBracket"])
 
-  testRegexHighlighting("\\i", ["error.incorrectEsc#\\i"])
+  testRegexHighlighting("\\i", ['escapeSymbol#\\', 'escapedSymbol#i'])
   testRegexHighlighting("\\:", ['escapeSymbol#\\', 'escapedSymbol#:'])
   
-  testRegexHighlighting("a]", ["defText"])
+  testRegexHighlighting("a]", ["defText#a", "defText#]"])
   testRegexHighlighting("[]", ["error"], true)
   testRegexHighlighting("[^]", ["error"], true)
   testRegexHighlighting("}+", ["defText", "quantifier"])

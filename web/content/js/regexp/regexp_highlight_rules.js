@@ -33,7 +33,7 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                  merge: false
                },
                { token: ['escapeSymbol', 'escapedSymbol'],
-                 regex: /(\\)([^a-zA-Z0-9])/,
+                 regex: /(\\)([^bB])/,
                  next: "afterAtom",
                  merge: false
                },
@@ -92,11 +92,6 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
                },
 
                {
-                 token: 'error.incorrectEsc',
-                 regex: /\\./
-               },
-                 
-               {
                  token: 'error',
                  regex: /./
                }
@@ -111,11 +106,6 @@ define('ace/mode/regexp_highlight_rules', ['require', 'exports', 'module' , 'ace
 
                { include: "#term" },
                  
-               {
-                 token: 'error.incorrectEsc',
-                 regex: /\\./
-               },
-
                {
                  token: 'error',
                  regex: /./
