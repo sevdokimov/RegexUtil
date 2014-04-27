@@ -71,21 +71,26 @@ function installFlagsCheckboxListener(regexpEditor, checkboxes) {
 function installRegexpHighlighter(regexpEditor) {
   regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarket(regexpEditor))
   regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
+  regexpEditor.getSession().addDynamicMarker(new RelatedElementMarker(regexpEditor), true)
 
   regexpEditor.on("change", function() {
     regexpEditor.onChangeBackMarker()
+    regexpEditor.onChangeFrontMarker()
   })
 
   regexpEditor.on("focus", function() {
     regexpEditor.onChangeBackMarker()
+    regexpEditor.onChangeFrontMarker()
   })
 
   regexpEditor.on("blur", function() {
     regexpEditor.onChangeBackMarker()
+    regexpEditor.onChangeFrontMarker()
   })
   
   regexpEditor.getSession().selection.on('changeCursor', function() {
     regexpEditor.onChangeBackMarker()
+    regexpEditor.onChangeFrontMarker()
   })
 }
 
