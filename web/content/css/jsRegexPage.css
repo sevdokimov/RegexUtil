@@ -15,3 +15,8 @@
 #flags label {
     padding-left: 10px;
 }
+
+#matchResult {
+    text-align: right;
+    font-size: smaller;
+}

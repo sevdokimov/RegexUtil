@@ -1,6 +1,6 @@
 var Range = ace.require("ace/range").Range;
 
-function installRegexpFindDependency(regexpEditor, textEditor) {
+function installRegexpFindDependency(regexpEditor, textEditor, matchesResult) {
   var marker = {
     id: 'regexTextFindMarked',
 
@@ -16,7 +16,7 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
 
       regex.lastIndex = 0
       
-      var odd = true
+      var matchCount = 0
       
       while (r = regex.exec(text)) {
         if (r[0].length == 0) {
@@ -28,23 +28,29 @@ function installRegexpFindDependency(regexpEditor, textEditor) {
         
         var range = Range.fromPoints(startPos, endPos)
 
-        if (range.end.row > range.start.row) {
-          markerLayer.drawMultiLineMarker(html,
-                                          range.toScreenRange(session),
-                                          odd ? 'matched1' : 'matched2',
-                                          config);
-          
+        drawLineMarker(markerLayer, html, range, session, (matchCount & 1) ? 'matched2' : 'matched1', config)
+        
+        matchCount++
+        
+        if (!regex.global) break
+      }
+      
+      if (matchesResult) {
+        var matchResultText
+        
+        if (matchCount == 0) {
+          matchResultText = "No matches"
         }
         else {
-          markerLayer.drawSingleLineMarker(html,
-                                           range.toScreenRange(session),
-                                           odd ? 'matched1' : 'matched2',
-                                           config);
+          if (regex.global) {
+            matchResultText = matchCount + " matches found"
+          }
+          else {
+            matchResultText = ""
+          }
         }
         
-        odd = !odd
-
-        if (!regex.global) break
+        matchesResult.text(matchResultText)
       }
     }
   }

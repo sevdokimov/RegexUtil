@@ -49,6 +49,7 @@
 
 <div style="font-weight: bold;padding-bottom: 7px">Text to check</div>
 <div id="textEditor" class="myEditor" style="height: 300px;font-size: 14px">1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31</div>
+<div id="matchResult"></div>
 
 </div>
 
@@ -84,7 +85,7 @@
                               mode: "ace/mode/text"
                           })
 
-    installRegexpFindDependency(regexpEditor, textEditor)
+    installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult'))
 </script>
 
 <script type="text/javascript">
