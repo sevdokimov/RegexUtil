@@ -69,6 +69,8 @@ function installFlagsCheckboxListener(regexpEditor, checkboxes) {
 }
 
 function installRegexpHighlighter(regexpEditor) {
+  var RelatedElementMarker = require('ess/regex/related_elements_marker').RelatedElementMarker
+  
   regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarket(regexpEditor))
   regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
   regexpEditor.getSession().addDynamicMarker(new RelatedElementMarker(regexpEditor), true)
