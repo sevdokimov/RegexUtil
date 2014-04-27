@@ -1,4 +1,4 @@
-function runTests() {
+function runTokenizerTests() {
   testRegexHighlighting("^\\b\\B$", ["assertion#^", "assertion#\\b", "assertion#\\B", "assertion#$"])
   testRegexHighlighting("a++", ["a", "quantifier", "error"])
   
