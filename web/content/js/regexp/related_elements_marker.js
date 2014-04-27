@@ -80,8 +80,46 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
                        itr.getCurrentTokenRow(), itr.getCurrentTokenColumn() + itr.getCurrentToken().value.length))
   } 
   
+  function quantifierRelatedElementFinder(itr, t, consumer) {
+    t.row = itr.getCurrentTokenRow()
+
+    var range = 0
+
+    do {
+      var currentToken = itr.stepBackward()
+      if (!currentToken) {
+        itr.stepForward()
+        break
+      }
+
+      if (currentToken.type == 'escapedSymbol') {
+        currentToken = itr.stepBackward()
+        if (!currentToken) {
+          itr.stepForward()
+          break
+        }
+      }
+      
+      if (currentToken.type == 'openBracket') {
+        if (range == 0) {
+          itr.stepForward()
+          break
+        }
+        else {
+          range--
+        }
+      }
+      else if (currentToken.type == 'closedBracket') {
+        range++
+      }
+    } while (range > 0)
+
+    consumer(new Range(itr.getCurrentTokenRow(), itr.getCurrentTokenColumn(), t.row, t.start))
+  }
+  
   var supportedRelatedElements = {
-    orSymbol: orSymbolRelatedElementFinder
+    orSymbol: orSymbolRelatedElementFinder,
+    quantifier: quantifierRelatedElementFinder
   }
   
   var RelatedElementMarker = function(regexpEditor) {
