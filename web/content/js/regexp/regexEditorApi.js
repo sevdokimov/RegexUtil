@@ -25,8 +25,10 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
       regexpEditor.old_regex_text = regexText
       regexpEditor.regex_old_flags = flags
 
+      regexpEditor.session.bracketStructure = evaluateBracketStructure(regexpEditor.session)
+      
       var regex = null;
-      try {
+      try {                                             
         regex = new RegExp(regexText, flags);
       }
       catch (e) {
@@ -52,6 +54,84 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
     onRegexChange()
 
     installRegexpHighlighter(regexpEditor)
+  }
+
+  function evaluateBracketStructure(session) {
+    var groups = []
+    var brackets = []
+
+    var itr = new MyTokenIterator(session, 0)
+
+    var openBrackets = []
+
+    var t = itr.getCurrentToken()
+    while (t) {
+      if (t.type == 'charClassStart') {
+        var br = {
+          row: itr.getCurrentTokenRow(),
+          column: itr.getCurrentTokenColumn(),
+          end: itr.getCurrentTokenColumn() + t.value.length
+        }
+        
+        brackets.push(br)
+
+        while (t = itr.stepForward()) {
+          if (t.type == 'charClassEnd') {
+            var closedBr = {
+              row: itr.getCurrentTokenRow(),
+              column: itr.getCurrentTokenColumn(),
+              end: itr.getCurrentTokenColumn() + 1
+            }
+            
+            closedBr.pair = br
+            br.pair = closedBr
+            
+            brackets.push(closedBr)
+            break
+          }
+        }
+      }
+      else if (t.type == 'openBracket') {
+        br = {
+          row: itr.getCurrentTokenRow(),
+          column: itr.getCurrentTokenColumn(),
+          end: itr.getCurrentTokenColumn() + t.value.length
+        }
+        brackets.push(br)
+        openBrackets.push(br)
+
+        if (t.value == '(') {
+          br.captureGroup = true
+        }
+      }
+      else if (t.type == 'closedBracket') {
+        closedBr = {
+          row: itr.getCurrentTokenRow(),
+          column: itr.getCurrentTokenColumn(),
+          end: itr.getCurrentTokenColumn() + 1
+        }
+        
+        brackets.push(closedBr)
+        
+        if (openBrackets.length > 0) {
+          br = openBrackets.pop()
+          
+          br.pair = closedBr
+          closedBr.pair = br
+          
+          if (br.captureGroup) {
+            groups.push(br)
+          }
+        }
+      }
+
+      t = itr.stepForward()
+    }
+    
+    return {
+      groups: groups,
+      brackets: brackets
+    }
   }
 
   function installFlagsCheckboxListener(regexpEditor, checkboxes) {
@@ -104,156 +184,63 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
   }
 
   function MatchedBracketMarket(regexpEditor) {
-    this.openBrackets = ['openBracket', 'charClassStart']
-
-    this.parentBracket = {
-      openBracket: 'closedBracket',
-      closedBracket: 'openBracket',
-      charClassStart: 'charClassEnd',
-      charClassEnd: 'charClassStart'
-    }
-
     this.update = function (html, markerLayer, session, config) {
       if (!regexpEditor.isFocused()) return
+      if (!session.bracketStructure) return
 
       var cursorPos = session.getSelection().getCursor()
+      var caretColumn = cursorPos.column
+      
+      var brackets = session.bracketStructure.brackets
+      
+      var bracketUnderCaret
+      
+      for (var i = 0; i < brackets.length; i++) {
+        var br = brackets[i]
+        
+        if (br.end < caretColumn) continue
+        
+        if (cursorPos.row < br.row) continue
+        if (cursorPos.row > br.row) break
 
-      var t = session.getTokenAt(cursorPos.row, cursorPos.column + 1)
+        if (caretColumn < br.column) break
 
-      var matchBracket
-
-      if (!t || !(matchBracket = this.parentBracket[t.type])) {
-        if (cursorPos.column == 0) {
-          return
-        }
-
-        t = session.getTokenAt(cursorPos.row, cursorPos.column)
-
-        if (!t || !(matchBracket = this.parentBracket[t.type])) {
-          return
-        }
-      }
-
-      var itr = new TokenIterator(session, cursorPos.row, t.start + 1)
-      var currentToken;
-
-      var forward = this.openBrackets.indexOf(t.type) > -1
-
-      var range = 0
-      while (true) {
-        if (forward) {
-          itr.stepForward()
-        }
-        else {
-          itr.stepBackward()
-        }
-
-        currentToken = itr.getCurrentToken();
-        if (!currentToken) {
-          return
-        }
-
-        if (currentToken.type == matchBracket) {
-          if (range == 0) {
-            break
-          }
-
-          range--
-        }
-        else if (currentToken.type == t.type) {
-          range++
+        if (br.pair) {
+          bracketUnderCaret = br
         }
       }
 
-      var firstBracketRange = new Range(cursorPos.row, t.start, cursorPos.row, t.start + t.value.length)
-      markerLayer.drawSingleLineMarker(html,
-                                       firstBracketRange.toScreenRange(session),
-                                       'matchedBracket',
-                                       config);
-
-      var matchedBracketRow = itr.getCurrentTokenRow()
-      var matchedBracketColumn = itr.getCurrentTokenColumn()
-      var secondBracketRange = new Range(matchedBracketRow, matchedBracketColumn, matchedBracketRow,
-                                         matchedBracketColumn + currentToken.value.length)
-
-      markerLayer.drawSingleLineMarker(html,
-                                       secondBracketRange.toScreenRange(session),
-                                       'matchedBracket',
-                                       config);
-
+      if (bracketUnderCaret) {
+        var row = bracketUnderCaret.row
+        if (row >= config.firstRow && row <= config.lastRow) {
+          var range = new Range(row, bracketUnderCaret.column, row, bracketUnderCaret.end)
+          markerLayer.drawSingleLineMarker(html, range.toScreenRange(session), 'matchedBracket', config);
+        }
+        
+        var pairRow = bracketUnderCaret.pair.row
+        if (pairRow >= config.firstRow && pairRow <= config.lastRow) {
+          range = new Range(row, bracketUnderCaret.pair.column, row, bracketUnderCaret.pair.end)
+          markerLayer.drawSingleLineMarker(html, range.toScreenRange(session), 'matchedBracket', config);
+        }
+      }
     }
   }
 
   function InvalidBracketMarker() {
     this.update = function (html, markerLayer, session, config) {
-      var itr = new MyTokenIterator(session, 0)
-
-      var openBrackets = []
-
-      var t
-      while ((t = itr.getCurrentToken())) {
-
-        if (t.type == 'charClassStart') {
-          var openBrRow = itr.getCurrentTokenRow()
-          var openBrColumn = itr.getCurrentTokenColumn()
-          var openBrLength = t.value.length
-
-          do {
-            t = itr.stepForward()
-            if (!t) {
-              if (openBrRow >= config.firstRow && openBrRow <= config.lastRow) {
-                var range = new Range(openBrRow, openBrColumn, openBrRow, openBrColumn + openBrLength)
-
-                markerLayer.drawSingleLineMarker(html,
-                                                 range.toScreenRange(session),
-                                                 'unmatchedBracket',
-                                                 config);
-              }
-              break
-            }
-
-            if (t.type == 'charClassEnd') {
-              break
-            }
-          }
-          while (true)
-        }
-        else if (t.type == 'openBracket') {
-          openBrackets.push({
-                              row: itr.getCurrentTokenRow(),
-                              column: itr.getCurrentTokenColumn(),
-                              len: t.value.length
-                            })
-        }
-        else if (t.type == 'closedBracket') {
-          if (openBrackets.length == 0) {
-            markerLayer.drawSingleLineMarker(html,
-                                             new Range(
-                                                 itr.getCurrentTokenRow(),
-                                                 itr.getCurrentTokenColumn(),
-                                                 itr.getCurrentTokenRow(),
-                                                 itr.getCurrentTokenColumn() + t.value.length).toScreenRange(session),
-                                             'unmatchedBracket',
-                                             config);
-          }
-          else {
-            openBrackets.pop()
+      if (!session.bracketStructure) return
+      
+      var brackets = session.bracketStructure.brackets
+      
+      for (var i = 0; i < brackets.length; i++) {
+        var br = brackets[i]
+        if (!br.pair) {
+          var row = br.row
+          if (row >= config.firstRow && row <= config.lastRow) {
+            var range = new Range(row, br.column, row, br.end)
+            markerLayer.drawSingleLineMarker(html, range.toScreenRange(session), 'unmatchedBracket', config);
           }
         }
-
-        itr.stepForward()
-      }
-
-      for (var i = 0; i < openBrackets.length; i++) {
-        var unmatchedBracket = openBrackets[i];
-        markerLayer.drawSingleLineMarker(html,
-                                         new Range(
-                                             unmatchedBracket.row,
-                                             unmatchedBracket.column,
-                                             unmatchedBracket.row,
-                                             unmatchedBracket.column + unmatchedBracket.len).toScreenRange(session),
-                                         'unmatchedBracket',
-                                         config);
       }
     }
   }
