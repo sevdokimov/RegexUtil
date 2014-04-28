@@ -63,6 +63,10 @@
 <script src="js/regexp/regexEditorApi.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript">
+    var regex_api = ace.require('ess/regex/regex_api');
+    var installRegexEditorApi = regex_api.installRegexEditorApi;
+    var installFlagsCheckboxListener = regex_api.installFlagsCheckboxListener;
+    
     var regexpEditor = ace.edit("regexpEditor");
     
     var regexStr = getUrlParam('regex')
