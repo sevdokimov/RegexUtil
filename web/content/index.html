@@ -32,7 +32,7 @@
 <div><b>Regular expression</b> <span style="font-size: smaller;font-style: italic">(JavaScript)</span></div>
 
 <div>
-<div id="regexpEditor" class="myEditor" style="height: 50px;">(19|20)\d\d([- /.])(0[1-9]|1[012])\2(0[1-9]|[12][0-9]|3[01])</div>
+<div id="regexpEditor" class="myEditor" style="height: 50px;"></div>
   <div id="flags" align="right">
     <label title="Perform case-insensitive matching">
       <input flagValue="i" type="checkbox"/>Case insensitive (<b>i</b>)
@@ -48,7 +48,7 @@
 
 
 <div style="font-weight: bold;padding-bottom: 7px">Text to test</div>
-<div id="textEditor" class="myEditor" style="height: 300px;font-size: 14px">1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31</div>
+<div id="textEditor" class="myEditor" style="height: 300px;font-size: 14px"></div>
 <div id="matchResult"></div>
 
 </div>
@@ -64,7 +64,20 @@
 
 <script type="text/javascript">
     var regexpEditor = ace.edit("regexpEditor");
-
+    
+    var regexStr = getUrlParam('regex')
+    var textStr
+    if (!regexStr) {
+        regexStr = '(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])'
+        textStr = '1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31'
+    }
+    else {
+        textStr = getUrlParam('text') || ''
+    }
+    
+    regexpEditor.setValue(regexStr)
+    regexpEditor.selection.clearSelection()
+    
     regexpEditor.setOptions({
                                 highlightActiveLine: false,
                                 showGutter: false,
@@ -77,6 +90,10 @@
     installFlagsCheckboxListener(regexpEditor, $('#flags input'))
 
     var textEditor = ace.edit("textEditor");
+
+    textEditor.setValue(textStr)
+    textEditor.selection.clearSelection()
+
     textEditor.setOptions({
                               highlightActiveLine: false,
                               showGutter: false,
