@@ -2,179 +2,90 @@
 <html>
 <head>
     <title>Regular Expression Tester</title>
-    <meta name="Description" content="Online regex tester. Full highlighting of regexp syntax. Very useful. The regex flavor of the java.util.regex package, available in the JDK 1.4 and later. (Java-applet)">
-    <meta name="keywords" content="regex online, regex editor, regex tester, java regex tester, java regex, online regex tester">
-    <link href="css/style.css" type="text/css" rel="stylesheet">
-    <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-    <script type="text/javascript" src="js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="js/jquery.getUrlParam.js"></script>
-    <script type="text/javascript" src="js/script.js"></script>
+
+    <meta name="Description"
+          content="Online regex tester. Full highlighting of regex syntax. Very useful. Javascript regex used.">
+    <meta name="keywords"
+          content="regex tester, regex online, regex editor, javascript regex, online regex tester, online regexp editor">
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <link rel="stylesheet" type="text/css" href="css/regexp.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsRegexPage.css">
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+
+    <script type="text/javascript" src="js/common.js" charset="utf-8"></script>
 </head>
-<body onload="appletInit();" onunload="appletSave()">
+
+<body>
 
 <script type="text/javascript" src="js/menu.js"></script>
 
-<h2>Regex Tester</h2>
-
-<div style="color:red;">
-    Since java 1.6.0_24 unsigned applets don't have access to system clipboard.
-    You can go to <a href="signedJar.html">page with signed applet</a>
-</div>
-<div style="font-size: small;margin-top: 10px">
-    If you can't run Java-Applet use <a href="jsRegexp.html">JavaScript version</a>
+<div style="font-size: small;margin-bottom: 20px">
+    This is sandbox to test JavaScript regular expression. To test JAVA regular expression you can use <a href="signedJar.html">java-applet</a>
 </div>
 
-<div style="float:right;color:#888;font-size:12px">
-    Java-applet that helps you test regular expressions flavor of the Sun Java standard API (java.util.regex)
+<div style="padding: 0 20px">
+
+<div><b>Regular expression</b> <span style="font-size: smaller;font-style: italic">(JavaScript)</span></div>
+
+<div>
+<div id="regexpEditor" class="myEditor" style="height: 50px;">(19|20)\d\d([- /.])(0[1-9]|1[012])\2(0[1-9]|[12][0-9]|3[01])</div>
+  <div id="flags" align="right">
+    <label title="Perform case-insensitive matching">
+      <input flagValue="i" type="checkbox"/>Case insensitive (<b>i</b>)
+    </label>
+    <label title="Perform a global match (find all matches rather than stopping after the first match)">
+      <input flagValue="g" checked="checked" type="checkbox"/>Global (<b>g</b>)
+    </label>
+    <label title="^ and $ will match the beginning/end of lines">
+      <input flagValue="m" type="checkbox"/>Multi-line (<b>m</b>)
+    </label>
+  </div>
 </div>
 
-<div style="border:1px solid;clear:both;">
+
+<div style="font-weight: bold;padding-bottom: 7px">Text to test</div>
+<div id="textEditor" class="myEditor" style="height: 300px;font-size: 14px">1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31</div>
+<div id="matchResult"></div>
+
+</div>
+
+<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/mode-regexp.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/regexp_highlight_rules.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/my_token_iterator.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="js/regexp/editorDependencies.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/related_elements_marker.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/regexp/regexEditorApi.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript">
-    var params = ['regex', 'text', 'flags', 'mode', 'replacement']
-    var paramVal = []
-    for (var i = 0; i < params.length; i++) {
-        var s = $(document).getUrlParam(params[i])
-        if (s != null)
-            paramVal.push({name:params[i], val:s})
-    }
+    var regexpEditor = ace.edit("regexpEditor");
 
-    if (paramVal.length == 0) {
-        for (var i = 0; i < params.length; i++) {
-            var s = $.cookie(params[i])
-            if (s != null)
-                paramVal.push({name:params[i], val:s})
-        }
-    }
+    regexpEditor.setOptions({
+                                highlightActiveLine: false,
+                                showGutter: false,
+                                showPrintMargin: false,
+                                theme: "ace/theme/chrome",
+                                mode: "ace/mode/regexp"
+                            })
 
-    if (paramVal.length == 0) {
-        paramVal = [
-            {name:'regex', val:'(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])'},
-            {name:'text', val:'1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31'}]
-    }
+    installRegexEditorApi(regexpEditor)
+    installFlagsCheckboxListener(regexpEditor, $('#flags input'))
 
-    var comment = '<div style="color:red;font-size:18px;width:600px;display:none;margin:40px 0">Your browser cannot run java-applet. Possibe Java Virtual Machine is not installed on your computer, you can install it from <a href="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads</a></div>'
-    if (navigator.userAgent.indexOf('MSIE') !== -1) {
-        document.write('<object name=JA classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" codebase="http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=1,5,0,0" WIDTH="100%" HEIGHT="470px"><PARAM NAME=CODE VALUE="com.ess.regexutil.applet.RegexApplet"><PARAM NAME=ARCHIVE VALUE="regexApplet.jar"><param name="type" value="application/x-java-applet;version=1.5"><param name="scriptable" value="false"><PARAM NAME="MAYSCRIPT" VALUE="true">')
-        for (var i = 0; i < paramVal.length; i++) {
-            document.write('<param name="' + paramVal[i].name + '" value="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '">')
-        }
-        document.write('<comment>')
-        document.write(comment)
-        document.write('</comment></object>')
-    } else {
-        document.write('<embed type="application/x-java-applet;version=1.5"CODE="com.ess.regexutil.applet.RegexApplet"ARCHIVE="regexApplet.jar"WIDTH="100%"HEIGHT="470px"scriptable="false"MAYSCRIPT="true"name="Regex Tester"pluginspage="http://java.sun.com/j2se/1.5.0/download.html"')
-        for (var i = 0; i < paramVal.length; i++) {
-            document.write(paramVal[i].name + '="' + paramVal[i].val.replace('&', '&amp;').replace('"', '&quot;') + '"')
-        }
-        document.write('><noembed>')
-        document.write(comment)
-        document.write('</noembed></embed>')
-    }
+    var textEditor = ace.edit("textEditor");
+    textEditor.setOptions({
+                              highlightActiveLine: false,
+                              showGutter: false,
+                              showPrintMargin: false,
+                              theme: "ace/theme/chrome",
+                              mode: "ace/mode/text"
+                          })
 
-    function appletSave() {
-////        try {
-//            var state = document.JA.saveState()
-//            var len = state.length / 2;
-//            for (var i = 0; i < len; i++ ) {
-//                $.cookie(state[i], state[i+len], {expires:10})
-//            }
-////        } catch (e) {
-////        }
-    }
-
-//    function autoSave() {
-//        appletSave()
-//        setTimeout('autoSave()', 3000)
-//    }
-
-    function appletInit() {
-//        setTimeout('autoSave()', 4000)
-    }
-
-</script>
-
-</div>
-
-<table cellpadding="0" cellspacing="0" style="margin:10px 0">
-    <tr>
-        <td>
-            <a style="margin:0 30px" href="http://sourceforge.net/donate/index.php?group_id=202567"><img src="http://images.sourceforge.net/images/project-support.jpg" width="88" height="32" border="0" alt="Support This Project" /> </a>
-        </td>
-        <td>
-            <script type="text/javascript"><!--
-            google_ad_client = "pub-9077233705776207";
-/* 728x90, создано 05.06.08 */
-            google_ad_slot = "8705144669";
-            google_ad_width = 728;
-            google_ad_height = 90;
-//-->
-            </script>
-            <script type="text/javascript"
-            src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-            </script>
-        </td>
-    </tr>
-</table>
-
-<h3>Features</h3>
-<ul id="features">
-
-	<li>
-	Full highlighting of regular expression syntax for an easy visual clue<br>
-	(including bracket matching <img popup="matchBrack1_a.PNG" src="images/win.PNG" alt="">, <img popup="matchBrack2_a.PNG" src="images/win.PNG" alt="">;
-        error detecting <img popup="error1_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="error2_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="error3_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="error4_a.PNG" src="images/win.PNG" alt="">)
-    </li>
-
-    <li>
-    Tooltips will be shown when the mouse is over a part of the regex.
-        <img popup="tooltip1_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="tooltip2_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="tooltip3_a.PNG" src="images/win.PNG" alt="">,
-        <img popup="tooltip4_a.PNG" src="images/win.PNG" alt="">
-    </li>
-
-    <li>
-        Evaluates your regular expression while you are typing;
-    </li>
-
-	<li>
-		4 distinct match modes:
-		<ul>
-			<li>Find a sequence of characters <img popup="find_a.PNG" src="images/win.PNG" alt="">;</li>
-			<li>Match a complete text <img popup="match1_a.PNG" src="images/win.PNG" alt="">, <img popup="match2_a.PNG" src="images/win.PNG" alt="">;</li>
-			<li>Split text (see java.lang.String.split(String regex)) <img popup="split_a.PNG" src="images/win.PNG" alt="">;</li>
-			<li>Replace <img popup="replace_a.PNG" src="images/win.PNG" alt="">;</li>
-		</ul>
-	</li>
-
-	<li>Support for pattern flags (e.g. Pattern.CASE_INSENSITIVE, Pattern.DOTALL, ...);</li>
-
-	<li>Generation of java source string literals based on the regexp, (escape slash, e.g. "\(x\)" becomes "\\(x\\)")</li>
-
-	<li>
-		Synchronized selection of regular expression and text:
-		Just select part of the regexp to see which part of the text is matched by this part.
-        <img popup="select_a.PNG" src="images/win.PNG" alt="">.
-    </li>
-
-</ul>
-
-<h3>Feedback</h3>
-You may submit bug reports or requests to <a href="mailto:sergey.evdokimov85@gmail.com">sergey.evdokimov85@gmail.com</a>
-
-<h3>Source code</h3>
-<a href="https://github.com/sevdokimov/RegexUtil">https://github.com/sevdokimov/RegexUtil</a>
-
-<div style="height:200px">&nbsp;</div>
-
-<script type="text/javascript">
-    $('#features [popup]').each(function(){
-        attachPopup(this, $('<img src="images/'+ this.getAttribute('popup') +'" alt="">') )
-    })
+    installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult'))
 </script>
 
 <script type="text/javascript">
@@ -189,5 +100,6 @@ You may submit bug reports or requests to <a href="mailto:sergey.evdokimov85@gma
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
 </script>
+
 </body>
 </html>
