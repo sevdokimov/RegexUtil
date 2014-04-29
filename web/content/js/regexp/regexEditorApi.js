@@ -158,7 +158,7 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
   }
 
   function installRegexpHighlighter(regexpEditor) {
-    regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarket(regexpEditor))
+    regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarker(regexpEditor))
     regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
     regexpEditor.getSession().addDynamicMarker(new RelatedElementMarker(regexpEditor), true)
 
@@ -183,7 +183,7 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
     })
   }
 
-  function MatchedBracketMarket(regexpEditor) {
+  function MatchedBracketMarker(regexpEditor) {
     this.update = function (html, markerLayer, session, config) {
       if (!regexpEditor.isFocused()) return
       if (!session.bracketStructure) return
