@@ -148,22 +148,5 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
 
   fixGroupCount()
 
-  //regexpEditor.getSession().selection.on("changeSelection", function () {
-  //  if (!regexpEditor.curOp.command.name) {
-  //    if (!regexpEditor.regexp_state_notification) {
-  //      regexEditorStateMayBeChanged(regexpEditor, textEditor)
-  //    }
-  //  }
-  //  else {
-  //    regexpEditor.regexp_state_notification = true
-  //  }
-  //})
-  //
-  //regexpEditor.commands.on("afterExec", function () {
-  //  if (regexpEditor.regexp_state_notification) {
-  //    regexpEditor.regexp_state_notification = false
-  //    regexEditorStateMayBeChanged(regexpEditor, textEditor)
-  //  }
-  //})
   textEditor.onChangeBackMarker()
 }
