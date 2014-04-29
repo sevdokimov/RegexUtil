@@ -49,8 +49,17 @@
 
 <div style="font-weight: bold;padding-bottom: 7px">Text to test</div>
 <div id="textEditor" class="myEditor" style="height: 300px;font-size: 14px"></div>
-<div id="matchResult"></div>
+<div id="matchResult">&nbsp<span></span></div>
 
+<div style="font-weight: bold;padding-bottom: 7px">Capture groups</div>
+<table id="captureGroups" cellpadding="0" cellspacing="3">
+    <tr>
+        <td>#0</td>
+        <td></td>
+    </tr>
+</table>
+
+    
 </div>
 
 <script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -106,7 +115,7 @@
                               mode: "ace/mode/text"
                           })
 
-    installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult'))
+    installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult span'), $('#captureGroups tbody'))
 </script>
 
 <script type="text/javascript">

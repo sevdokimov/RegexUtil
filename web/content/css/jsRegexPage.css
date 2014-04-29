@@ -20,3 +20,18 @@
     text-align: right;
     font-size: smaller;
 }
+
+#captureGroups td {
+    padding: 5px 10px;
+}
+
+#captureGroups td:first-child {
+    text-align: right;
+    font-weight: bold;
+    color: #006;
+}
+
+#captureGroups span.spec {
+    color: #777;
+    font-style: italic;
+}

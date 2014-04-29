@@ -47,6 +47,12 @@
     border: solid #aaf 1px;
 }
 
+.currentMatchResult {
+    border: solid #449 1px;
+    position: absolute;
+    z-index: 6;
+}
+
 .ace_marker-layer .matched1, .ace_marker-layer .matched2, .ace_marker-layer .matchedBracket, .unmatchedBracket, .relatedToken {
     position: absolute;
     z-index: 5;
@@ -54,4 +60,11 @@
 
 .ace_hidden-cursors .ace_cursor {
     visibility: hidden;
+}
+
+.groupText {
+    background: #ccc;
+    padding: 2px;
+    font-family: monospace;
+    white-space: pre;
 }

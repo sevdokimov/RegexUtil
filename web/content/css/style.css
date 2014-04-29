@@ -4,6 +4,10 @@ body {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+table {
+    border-collapse: collapse;
+}
+
 #tBar {
     margin:0 0 20px 0;
     border-bottom: solid 1px #36638E;
