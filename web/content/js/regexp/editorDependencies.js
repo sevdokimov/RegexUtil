@@ -124,13 +124,13 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
       var groupRows = groupTable.groupRows
       if (groupRows == undefined) {
         groupTable.groupRows = groupRows = []
-        groupRows.push($("tr", groupTable)[0])
+        groupRows.push($("tr", groupTable))
       }
       
       if (groupRows.length != bracketStructure.groups.length + 1) {
         if (groupRows.length > bracketStructure.groups.length + 1) {
           while (groupRows.length > bracketStructure.groups.length + 1) {
-            $(groupRows.pop()).remove()
+            groupRows.pop().remove()
           }
         }
         else {
@@ -150,6 +150,22 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
   })
 
   fixGroupCount()
+
+  if (groupTable) {
+    regexpEditor.matchedBracketMarker.addSelectedGroupListener(function() {
+      var selectedGroupIndex = regexpEditor.matchedBracketMarker.selectedGroupIndex
+
+      var groupRows = groupTable.groupRows
+
+      for (var i = 0; i < groupRows.length; i++) {
+        groupRows[i].removeClass('selectedGroupTr');
+      }
+
+      if (selectedGroupIndex) {
+        groupRows[selectedGroupIndex].addClass('selectedGroupTr')
+      }
+    })
+  }
 
   textEditor.onChangeBackMarker()
 }

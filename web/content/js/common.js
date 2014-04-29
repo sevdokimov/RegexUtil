@@ -31,3 +31,10 @@ function getUrlParam(name){
     return decodeURIComponent(name[1]);
   }
 }
+
+function sendNotification(listeners, e) {
+  var len = listeners.length
+  for (var i = 0; i < len; i++) {
+    listeners[i](e);
+  }
+}

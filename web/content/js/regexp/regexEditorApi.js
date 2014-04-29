@@ -36,10 +36,7 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
 
       regexpEditor.regex = regex
 
-      var len = regex_change_listeners.length
-      for (var i = 0; i < len; i++) {
-        regex_change_listeners[i]();
-      }
+      sendNotification(regex_change_listeners)
     }
 
     regexpEditor.on("change", function () {
@@ -121,6 +118,7 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
           
           if (br.captureGroup) {
             groups.push(br)
+            closedBr.captureGroup = br.captureGroup = groups.length
           }
         }
       }
@@ -158,7 +156,8 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
   }
 
   function installRegexpHighlighter(regexpEditor) {
-    regexpEditor.getSession().addDynamicMarker(new MatchedBracketMarker(regexpEditor))
+    regexpEditor.matchedBracketMarker = new MatchedBracketMarker(regexpEditor)
+    regexpEditor.getSession().addDynamicMarker(regexpEditor.matchedBracketMarker)
     regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
     regexpEditor.getSession().addDynamicMarker(new RelatedElementMarker(regexpEditor), true)
 
@@ -184,31 +183,39 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
   }
 
   function MatchedBracketMarker(regexpEditor) {
+    this.$selectedGroupListeners = []
+    this.addSelectedGroupListener = function(l) {
+      this.$selectedGroupListeners.push(l)
+    }
+
     this.update = function (html, markerLayer, session, config) {
-      if (!regexpEditor.isFocused()) return
       if (!session.bracketStructure) return
 
-      var cursorPos = session.getSelection().getCursor()
-      var caretColumn = cursorPos.column
-      
-      var brackets = session.bracketStructure.brackets
-      
       var bracketUnderCaret
-      
-      for (var i = 0; i < brackets.length; i++) {
-        var br = brackets[i]
-        
-        if (br.end < caretColumn) continue
-        
-        if (cursorPos.row < br.row) continue
-        if (cursorPos.row > br.row) break
 
-        if (caretColumn < br.column) break
+      if (regexpEditor.isFocused()) {
+        var cursorPos = session.getSelection().getCursor()
+        var caretColumn = cursorPos.column
 
-        if (br.pair) {
-          bracketUnderCaret = br
+        var brackets = session.bracketStructure.brackets
+
+        for (var i = 0; i < brackets.length; i++) {
+          var br = brackets[i]
+
+          if (br.end < caretColumn) continue
+
+          if (cursorPos.row < br.row) continue
+          if (cursorPos.row > br.row) break
+
+          if (caretColumn < br.column) break
+
+          if (br.pair) {
+            bracketUnderCaret = br
+          }
         }
       }
+
+      var selectedGroupIndex
 
       if (bracketUnderCaret) {
         var row = bracketUnderCaret.row
@@ -222,6 +229,13 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
           range = new Range(row, bracketUnderCaret.pair.column, row, bracketUnderCaret.pair.end)
           markerLayer.drawSingleLineMarker(html, range.toScreenRange(session), 'matchedBracket', config);
         }
+
+        selectedGroupIndex = bracketUnderCaret.captureGroup
+      }
+
+      if (this.selectedGroupIndex != selectedGroupIndex) {
+        this.selectedGroupIndex = selectedGroupIndex
+        sendNotification(this.$selectedGroupListeners)
       }
     }
   }

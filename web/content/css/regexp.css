@@ -68,3 +68,7 @@
     font-family: monospace;
     white-space: pre;
 }
+
+.selectedGroupTr {
+    background: #e2e2ff;
+}
