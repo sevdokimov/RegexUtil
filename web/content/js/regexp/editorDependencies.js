@@ -88,11 +88,14 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
               for (var i = 0; i < groupRows.length; i++) {
                 var tr = groupRows[i]
 
-                var s = ""
-                if (currentMatchResult) {
-                  s = currentMatchResult[i] || ""
+                var s = currentMatchResult[i]
+                if (s == undefined || s == null) {
+                  $('td:last-child', tr).html("<span class='spec'>null<span>")
                 }
-                $('td:last-child', tr).empty().append($("<span class='groupText'></span>").text(s))
+                else {
+                  $('td:last-child', tr).empty().append($("<span class='groupText'></span>").text(s))
+                }
+                
               }
             }
           }
