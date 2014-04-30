@@ -42,3 +42,10 @@ function sendNotification(listeners, e) {
 function copyToClipboard(text) {
   window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 }
+
+function customizeEditor(editor) {
+  editor.commands.removeCommand('indent')
+  editor.commands.removeCommand('outdent')
+  editor.commands.removeCommand('centerselection')
+  editor.commands.removeCommand('gotoline')
+}

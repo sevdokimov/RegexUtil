@@ -84,19 +84,24 @@
 <script src="js/regexp/regexEditorApi.js" type="text/javascript" charset="utf-8"></script>
 
 <script type="text/javascript">
+    if (getUrlParam('flags') != undefined) {
+        initFlags(getUrlParam('flags'))
+    }
+
     var regex_api = ace.require('ess/regex/regex_api');
     var installRegexEditorApi = regex_api.installRegexEditorApi;
     var installFlagsCheckboxListener = regex_api.installFlagsCheckboxListener;
     
     var regexpEditor = ace.edit("regexpEditor");
+    customizeEditor(regexpEditor)
+    regexpEditor.setOptions({
+                                highlightActiveLine: false,
+                                showGutter: false,
+                                showPrintMargin: false,
+                                theme: "ace/theme/chrome",
+                                mode: "ace/mode/regexp"
+                            })
 
-    regexpEditor.commands.removeCommand('indent')
-    regexpEditor.commands.removeCommand('outdent')
-    
-    if (getUrlParam('flags') != undefined) {
-        initFlags(getUrlParam('flags'))
-    }
-    
     var regexStr = getUrlParam('regex')
     var textStr
     if (!regexStr) {
@@ -110,25 +115,12 @@
     regexpEditor.setValue(regexStr)
     regexpEditor.selection.clearSelection()
     
-    regexpEditor.setOptions({
-                                highlightActiveLine: false,
-                                showGutter: false,
-                                showPrintMargin: false,
-                                theme: "ace/theme/chrome",
-                                mode: "ace/mode/regexp"
-                            })
 
     installRegexEditorApi(regexpEditor)
     installFlagsCheckboxListener(regexpEditor, $('#flags input'))
 
     var textEditor = ace.edit("textEditor");
-
-    textEditor.commands.removeCommand('indent')
-    textEditor.commands.removeCommand('outdent')
-
-    textEditor.setValue(textStr)
-    textEditor.selection.clearSelection()
-
+    customizeEditor(textEditor)
     textEditor.setOptions({
                               highlightActiveLine: false,
                               showGutter: false,
@@ -136,6 +128,9 @@
                               theme: "ace/theme/chrome",
                               mode: "ace/mode/text"
                           })
+
+    textEditor.setValue(textStr)
+    textEditor.selection.clearSelection()
 
     installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult span'), $('#captureGroups tbody'))
     
