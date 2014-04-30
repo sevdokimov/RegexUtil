@@ -29,8 +29,20 @@
 
 <div style="padding: 0 20px">
 
-<div><b>Regular expression</b> <span style="font-size: smaller;font-style: italic">(JavaScript)</span></div>
-
+<table cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="left" width="99%">
+            <div><b>Regular expression</b> <span style="font-size: smaller;font-style: italic">(JavaScript)</span></div>
+        </td>
+        <td style="padding-right: 6px">
+            <a class="actionButton" href="#" onclick="copyRegex();return false">
+                <img src="images/copyLink.jpg" alt="Copy link to current editor state" title="Copy link to current editor state"/>
+            </a>
+        </td>
+    </tr>
+</table>
+    
+<div style="clear: both"></div>
 <div>
 <div id="regexpEditor" class="myEditor" style="height: 50px;"></div>
   <div id="flags" align="right">
@@ -81,6 +93,10 @@
     regexpEditor.commands.removeCommand('indent')
     regexpEditor.commands.removeCommand('outdent')
     
+    if (getUrlParam('flags') != undefined) {
+        initFlags(getUrlParam('flags'))
+    }
+    
     var regexStr = getUrlParam('regex')
     var textStr
     if (!regexStr) {
@@ -122,6 +138,31 @@
                           })
 
     installRegexpFindDependency(regexpEditor, textEditor, $('#matchResult span'), $('#captureGroups tbody'))
+    
+    function initFlags(flags) {
+        $('#flags input:checkbox').each(function() {
+            var checked = flags.indexOf($(this).attr('flagValue')) >= 0
+            $(this).prop('checked', checked)
+        })
+    }
+    
+    function copyRegex() {
+        var res = "http://myregexp.com?" + "regex=" + encodeURIComponent(regexpEditor.getValue())
+        
+        var text = textEditor.getValue()
+        if (text.length > 1000) {
+            text = ""
+        }
+        if (text) {
+            res += "&text=" + encodeURIComponent(text)
+        }
+        
+        if (regexpEditor.regex_flags != "g") {
+            res += "&flags=" + regexpEditor.regex_flags
+        }
+        
+        copyToClipboard(res)
+    }
 </script>
 
 <script type="text/javascript">

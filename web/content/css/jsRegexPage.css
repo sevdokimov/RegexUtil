@@ -35,3 +35,11 @@
     color: #777;
     font-style: italic;
 }
+
+.actionButton img {
+    border: 1px solid #fff;
+}
+
+.actionButton img:hover {
+    border: 1px solid #ddd;
+}
