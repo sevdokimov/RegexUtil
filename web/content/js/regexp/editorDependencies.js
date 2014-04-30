@@ -125,6 +125,10 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
       if (groupRows == undefined) {
         groupTable.groupRows = groupRows = []
         groupRows.push($("tr", groupTable))
+
+        groupRows[0].mouseenter(function() {
+          regexpEditor.setHighlightedGroup(0)
+        })
       }
       
       if (groupRows.length != bracketStructure.groups.length + 1) {
@@ -138,6 +142,12 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
             var e = $("<tr><td>#" + i + "</td><td></td></tr>")
             groupTable.append(e)
             groupRows.push(e)
+
+            e[0].groupIndex = i
+
+            e.mouseenter(function() {
+              regexpEditor.setHighlightedGroup(this.groupIndex)
+            })
           }
         }
       }
@@ -164,6 +174,10 @@ function installRegexpFindDependency(regexpEditor, textEditor, matchesResult, gr
       if (selectedGroupIndex) {
         groupRows[selectedGroupIndex].addClass('selectedGroupTr')
       }
+    })
+
+    groupTable.mouseleave(function() {
+      regexpEditor.setHighlightedGroup(undefined)
     })
   }
 

@@ -14,6 +14,13 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
       regex_change_listeners.push(listener)
     }
 
+    regexpEditor.setHighlightedGroup = function(groupIndex) {
+      if (regexpEditor.$highlightedGroupIndex != groupIndex) {
+        regexpEditor.$highlightedGroupIndex = groupIndex
+        regexpEditor.onChangeBackMarker()
+      }
+    }
+
     var onRegexChange = function () {
       var regexText = regexpEditor.getValue()
 
@@ -160,6 +167,7 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
     regexpEditor.getSession().addDynamicMarker(regexpEditor.matchedBracketMarker)
     regexpEditor.getSession().addDynamicMarker(new InvalidBracketMarker())
     regexpEditor.getSession().addDynamicMarker(new RelatedElementMarker(regexpEditor), true)
+    regexpEditor.getSession().addDynamicMarker(new SelectedGroupHighlighter(regexpEditor))
 
     regexpEditor.on("change", function () {
       regexpEditor.onChangeBackMarker()
@@ -180,6 +188,27 @@ define('ess/regex/regex_api', [], function(require, exports, module) {
       regexpEditor.onChangeBackMarker()
       regexpEditor.onChangeFrontMarker()
     })
+  }
+
+  function SelectedGroupHighlighter(regexpEditor) {
+    this.update = function (html, markerLayer, session, config) {
+      var groupIndex = regexpEditor.$highlightedGroupIndex
+      if (groupIndex == undefined || !session.bracketStructure) return
+
+      if (groupIndex == 0) {
+        var lastRow = regexpEditor.session.getLength() - 1
+        drawLineMarker(markerLayer, html, 
+                       new Range(0, 0, lastRow, regexpEditor.session.getLine(lastRow).length), 
+                       session, 'selectedGroupMarker', config)
+      }
+      else {
+        var br = session.bracketStructure.groups[groupIndex - 1]
+        if (!br) return
+      
+        var range = new Range(br.row, br.column, br.pair.row, br.pair.end)
+        drawLineMarker(markerLayer, html, range, session, 'selectedGroupMarker', config)
+      }
+    }
   }
 
   function MatchedBracketMarker(regexpEditor) {

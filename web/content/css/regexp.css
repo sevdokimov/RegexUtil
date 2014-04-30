@@ -72,3 +72,9 @@
 .selectedGroupTr {
     background: #e2e2ff;
 }
+
+.selectedGroupMarker {
+    border: 1px solid #55f;
+    position: absolute;
+    z-index: 7;
+}
