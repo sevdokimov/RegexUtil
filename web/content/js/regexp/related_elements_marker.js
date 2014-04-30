@@ -117,9 +117,27 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
     consumer(new Range(itr.getCurrentTokenRow(), itr.getCurrentTokenColumn(), t.row, t.start))
   }
   
+  function groupReferenceRelatedElementFinder(itr, t, consumer, session) {
+    var bracketStructure = session.bracketStructure
+    if (!bracketStructure) return
+    
+    var groupNumber = parseInt(t.value.substring(1))
+    var br = bracketStructure.groups[groupNumber - 1]
+    if (!br) return
+    
+    var closedBr = br.pair
+    
+    if (closedBr.row > itr.getCurrentTokenRow() || (closedBr.row == itr.getCurrentTokenRow() && closedBr.column > t.start)) {
+      return
+    }
+    
+    consumer(new Range(br.row, br.column, closedBr.row, closedBr.end))
+  }
+  
   var supportedRelatedElements = {
     orSymbol: orSymbolRelatedElementFinder,
-    quantifier: quantifierRelatedElementFinder
+    quantifier: quantifierRelatedElementFinder,
+    groupRef: groupReferenceRelatedElementFinder
   }
   
   var RelatedElementMarker = function(regexpEditor) {
@@ -148,7 +166,7 @@ define('ess/regex/related_elements_marker', ['ace/token_iterator', 'ace/range'],
         if (!range.isEmpty()) {
           drawLineMarker(markerLayer, html, range, session, 'relatedToken', config)
         }
-      })
+      }, session)
     }
   };
 
