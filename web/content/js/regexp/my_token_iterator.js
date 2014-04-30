@@ -7,6 +7,11 @@ var MyTokenIterator = function(session, initialRow) {
     this.$rowTokens = session.getTokens(initialRow);
     this.$column = 0
   
+  while (this.$rowTokens.length == 0 && this.$row < session.getLength() - 1) {
+    this.$row++
+    this.$rowTokens = session.getTokens(this.$row);
+  }
+  
     var token = this.$rowTokens[0];
     this.$tokenIndex = token ? 0 : -1;
 };
