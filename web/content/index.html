@@ -19,7 +19,7 @@
     <script type="text/javascript" src="js/common.js" charset="utf-8"></script>
 </head>
 
-<body>
+<body onunload="saveRegexAndText()">
 
 <script type="text/javascript" src="js/menu.js"></script>
 
@@ -87,6 +87,9 @@
     if (getUrlParam('flags') != undefined) {
         initFlags(getUrlParam('flags'))
     }
+    else if (localStorage.getItem('flags') != null) {
+        initFlags(localStorage.getItem('flags'))
+    }
 
     var regex_api = ace.require('ess/regex/regex_api');
     var installRegexEditorApi = regex_api.installRegexEditorApi;
@@ -105,8 +108,14 @@
     var regexStr = getUrlParam('regex')
     var textStr
     if (!regexStr) {
-        regexStr = '(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])'
-        textStr = '1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31'
+        regexStr = localStorage.getItem('regex')
+        if (regexStr != null && regexStr != undefined) {
+            textStr = localStorage.getItem('text') || ''
+        }
+        else {
+            regexStr = '(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])'
+            textStr = '1900-01-01 2007/08/13 1900.01.01 1900 01 01 1900-01.01 1900 13 01 1900 02 31'
+        }
     }
     else {
         textStr = getUrlParam('text') || ''
@@ -157,6 +166,12 @@
         }
         
         copyToClipboard(res)
+    }
+    
+    function saveRegexAndText() {
+        localStorage.setItem('regex', regexpEditor.getValue())
+        localStorage.setItem('text', textEditor.getValue())
+        localStorage.setItem('flags', regexpEditor.regex_flags)
     }
 </script>
 
