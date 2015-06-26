@@ -40,8 +40,8 @@
     }
 
     if (paramVal.length == 0) {
-        for (var i = 0; i < params.length; i++) {
-            var s = $.cookie(params[i])
+        for (i = 0; i < params.length; i++) {
+            s = $.cookie(params[i])
             if (s != null)
                 paramVal.push({name:params[i], val:s})
         }
