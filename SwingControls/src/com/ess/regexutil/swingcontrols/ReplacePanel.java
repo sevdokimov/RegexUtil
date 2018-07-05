@@ -51,7 +51,19 @@ public class ReplacePanel extends RegexResultPanel {
 		sh = new SecondaryEditorHilighter(highlighter, text, true);
 		rh = new ReplaceHilighter(text, result, highlighter, replacement, true);
 	}
-	
+
+	public JTextPane getEditor() {
+		return text.getEditor();
+	}
+
+	public JTextPane getResultEditor() {
+		return result.getEditor();
+	}
+
+	public JTextPane getReplacementEditor() {
+		return replacement.getEditor();
+	}
+
 	@Override
 	public void lostFocus() {
 		sh.setDisable(true);

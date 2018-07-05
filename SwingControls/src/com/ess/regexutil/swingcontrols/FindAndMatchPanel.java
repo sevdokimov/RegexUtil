@@ -28,6 +28,11 @@ public class FindAndMatchPanel extends RegexResultPanel {
 		sh.setMatchMode(match);
 	}
 
+
+	public JTextPane getEditor() {
+		return textAdapter.getEditor();
+	}
+
 	@Override
 	public void lostFocus() {
 		sh.setDisable(true);

@@ -42,6 +42,14 @@ public class SplitPanel extends RegexResultPanel {
 		splitH = new SplitHilighter(text, result, highlighter, true);
 	}
 
+	public JTextPane getEditor() {
+		return text.getEditor();
+	}
+
+	public JTextPane getResultEditor() {
+		return result.getEditor();
+	}
+
 	@Override
 	public void lostFocus() {
 		sh.setDisable(true);
