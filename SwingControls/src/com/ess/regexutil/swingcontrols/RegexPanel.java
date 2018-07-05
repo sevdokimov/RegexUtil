@@ -36,6 +36,8 @@ public class RegexPanel extends JPanel {
 	private RegexResultPanel currentSelect;
 	
 	private SwingAdapter regexAdapter;
+
+	private List<JTextPane> editorPanels;
 	
 	private List<Action> actions;
 
@@ -63,6 +65,7 @@ public class RegexPanel extends JPanel {
         regexAdapter = new SwingAdapter(false);
 		JTextPane regexEditor = regexAdapter.getEditor();
 		regexEditor.setFont(new Font("MonoSpaced", Font.PLAIN, 13));
+		editorPanels.add(regexAdapter.getEditor());
 
 		flags = new Flags();
 		RegexHighlighter highlighter = new RegexHighlighter(regexAdapter, flags);

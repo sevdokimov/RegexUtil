@@ -3,8 +3,7 @@ package com.ess.regexutil.swingcontrols;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.*;
 
 import com.ess.regexutil.controls.RegexHighlighter;
 import com.ess.regexutil.controls.SecondaryEditorHilighter;
