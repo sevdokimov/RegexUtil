@@ -36,6 +36,8 @@ public class RegexPanel extends JPanel {
 	private RegexResultPanel currentSelect;
 	
 	private SwingAdapter regexAdapter;
+
+	private List<JTextPane> editorPanels;
 	
 	private List<Action> actions;
 
@@ -56,10 +58,14 @@ public class RegexPanel extends JPanel {
     public RegexPanel() {
 		super(new CardLayout(4, 4));
 
+
+        editorPanels = new ArrayList<JTextPane>();
+
         // Create regex panel
         regexAdapter = new SwingAdapter(false);
 		JTextPane regexEditor = regexAdapter.getEditor();
 		regexEditor.setFont(new Font("MonoSpaced", Font.PLAIN, 13));
+		editorPanels.add(regexAdapter.getEditor());
 
 		flags = new Flags();
 		RegexHighlighter highlighter = new RegexHighlighter(regexAdapter, flags);
@@ -86,12 +92,27 @@ public class RegexPanel extends JPanel {
         regexScrollPane.setPreferredSize(new Dimension(regexScrollPane.getPreferredSize().width, 50));
         regexPanel.add(regexScrollPane, BorderLayout.CENTER);
 
+        FindAndMatchPanel findPanel = new FindAndMatchPanel(highlighter, false);
+        editorPanels.add(findPanel.getEditor());
+
+        FindAndMatchPanel matchPanel = new FindAndMatchPanel(highlighter, true);
+        editorPanels.add(matchPanel.getEditor());
+
+        SplitPanel splitPanel = new SplitPanel(highlighter);
+        editorPanels.add(splitPanel.getEditor());
+        editorPanels.add(splitPanel.getResultEditor());
+
+        ReplacePanel replacePanel = new ReplacePanel(highlighter);
+        editorPanels.add(replacePanel.getEditor());
+        editorPanels.add(replacePanel.getResultEditor());
+        editorPanels.add(replacePanel.getReplacementEditor());
+
         // Create Text tab
         Mode[] modes = new Mode[]{
-                new Mode("Find", new FindAndMatchPanel(highlighter, false), "Find all subsequence in text."),
-                new Mode("Match", new FindAndMatchPanel(highlighter, true), "Attempts to match the text against the regexp."),
-                new Mode("Split", new SplitPanel(highlighter), null),
-                new Mode("Replace", new ReplacePanel(highlighter), null),
+                new Mode("Find", findPanel, "Find all subsequence in text."),
+                new Mode("Match", matchPanel, "Attempts to match the text against the regexp."),
+                new Mode("Split", splitPanel, null),
+                new Mode("Replace", replacePanel, null),
         };
 
         tab = new JTabbedPane();
@@ -121,6 +142,10 @@ public class RegexPanel extends JPanel {
 
     public void setCopyPasteAdapter(CopyPasteAdapter copyPasteAdapter) {
         this.copyPasteAdapter = copyPasteAdapter;
+    }
+
+    public List<JTextPane> getEditors() {
+        return editorPanels;
     }
 
     private void addCopyPasteActions(final RegexTransfer transfer, String copyText, String pasteText) {

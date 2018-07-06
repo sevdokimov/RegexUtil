@@ -25,7 +25,8 @@
     
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Regex Tester" anchor="bottom" secondary="false"
-                    factoryClass="com.ess.regexutil.ideaplugin.RegexpToolWindowFactory" />
+                    factoryClass="com.ess.regexutil.ideaplugin.RegexpToolWindowFactory"
+                    icon="/icons/icon.png"/>
         
         <projectService serviceImplementation="com.ess.regexutil.ideaplugin.RegexpStateService" />
     </extensions>

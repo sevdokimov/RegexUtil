@@ -3,7 +3,7 @@ package com.ess.regexutil.swingcontrols;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 import com.ess.regexutil.controls.RegexHighlighter;
 import com.ess.regexutil.controls.SecondaryEditorHilighter;
@@ -26,6 +26,11 @@ public class FindAndMatchPanel extends RegexResultPanel {
 		
 		sh = new SecondaryEditorHilighter(highlighter, textAdapter, true);
 		sh.setMatchMode(match);
+	}
+
+
+	public JTextPane getEditor() {
+		return textAdapter.getEditor();
 	}
 
 	@Override

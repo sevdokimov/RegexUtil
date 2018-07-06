@@ -4,11 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.*;
 
 import com.ess.regexutil.controls.RegexHighlighter;
 import com.ess.regexutil.controls.ReplaceHilighter;
@@ -51,7 +47,19 @@ public class ReplacePanel extends RegexResultPanel {
 		sh = new SecondaryEditorHilighter(highlighter, text, true);
 		rh = new ReplaceHilighter(text, result, highlighter, replacement, true);
 	}
-	
+
+	public JTextPane getEditor() {
+		return text.getEditor();
+	}
+
+	public JTextPane getResultEditor() {
+		return result.getEditor();
+	}
+
+	public JTextPane getReplacementEditor() {
+		return replacement.getEditor();
+	}
+
 	@Override
 	public void lostFocus() {
 		sh.setDisable(true);

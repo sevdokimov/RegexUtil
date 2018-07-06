@@ -3,8 +3,7 @@ package com.ess.regexutil.swingcontrols;
 import java.awt.BorderLayout;
 import java.awt.Font;
 
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.*;
 
 import com.ess.regexutil.controls.RegexHighlighter;
 import com.ess.regexutil.controls.SecondaryEditorHilighter;
@@ -40,6 +39,14 @@ public class SplitPanel extends RegexResultPanel {
 		sh = new SecondaryEditorHilighter(highlighter, text, true);
 		
 		splitH = new SplitHilighter(text, result, highlighter, true);
+	}
+
+	public JTextPane getEditor() {
+		return text.getEditor();
+	}
+
+	public JTextPane getResultEditor() {
+		return result.getEditor();
 	}
 
 	@Override
