@@ -131,6 +131,7 @@ public class SwingAdapter implements ITextEditorAdapter {
 		}
 		
         editor.setBackground(Color.WHITE);
+		editor.setBorder(BorderFactory.createEmptyBorder(3, 4, 3, 4));
 
 		StyledDocument doc = editor.getStyledDocument(); 
 		Style defStyle = StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE);

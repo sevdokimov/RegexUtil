@@ -17,7 +17,7 @@ import javax.swing.text.ViewFactory;
 public class OneLineJTextPane extends JTextPane {
 	
 	public OneLineJTextPane() {
-		setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 4));
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 6));
 	}
 	
     protected EditorKit createDefaultEditorKit() {
