@@ -10,8 +10,8 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 
 import javax.swing.*;
-import java.util.List;
 import java.awt.*;
+import java.util.List;
 
 public class RegexpToolWindowFactory implements ToolWindowFactory {
     public void createToolWindowContent(Project project, ToolWindow toolWindow) {
@@ -40,7 +40,7 @@ public class RegexpToolWindowFactory implements ToolWindowFactory {
     }
 
     private boolean isColorDark(Color cl) {
-        double darkness = 1 - (0.299 * cl.getRed() + 0.587 * cl.getGreen() + 0.114 * cl.getBlue()) / 255;
+        double darkness = (0.299 * cl.getRed() + 0.587 * cl.getGreen() + 0.114 * cl.getBlue()) / 255;
         return (darkness < 0.5);
     }
 }
