@@ -183,12 +183,12 @@ public class RegexConfig {
 
         @Override
         public ITextStyle getMatchedText1() {
-            return TextStyle.backgroundStyle(0x454545);
+            return TextStyle.backgroundStyle(0x656545);
         }
 
         @Override
         public ITextStyle getMatchedText2() {
-            return TextStyle.backgroundStyle(0x454787);
+            return TextStyle.backgroundStyle(0x50508F);
         }
 
         @Override
