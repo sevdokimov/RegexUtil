@@ -17,8 +17,8 @@
 
   ]]></description>
 
-    <version>1.0.5</version>
-    <idea-version since-build="90.1"/>
+    <version>1.0.7</version>
+    <idea-version since-build="191.1.1"/>
     <vendor email="sergey.evdokimov85@gmail.com">Sergey Evdokimov</vendor>
 
     <depends>com.intellij.modules.lang</depends>
