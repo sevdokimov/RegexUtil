@@ -1,16 +1,21 @@
 package com.ess.regexutil.regexparser;
 
+import com.ess.regexutil.regexparser.RegexParser.RegexParserState;
+import com.ess.util.Helper;
+
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ess.regexutil.regexparser.RegexParser.RegexParserState;
-import com.ess.util.Helper;
-
 
 public class OpenBracket extends Bracket {
 
-	private final static Pattern PATTERN = Pattern.compile("\\G(?:[=!>]|<[=!]|([imsducx]*)(?:-([imsducx]*))?(:|\\)))"); //$NON-NLS-1$
+	private final static Pattern PATTERN = Pattern.compile("\\G(?:" +
+			"[=!>]" +
+			"|<[=!]" +
+			"|<[a-zA-Z][a-zA-Z0-9]*>" +
+			"|([imsduUcx]*)(?:-([imsduUcx]*))?(:|\\)" +
+			"))"); //$NON-NLS-1$
 	
 	private static final Map<Character, Integer> FLAGS_CODE = Helper.createSimpleMap(new Object[]{
 			'd', Pattern.UNIX_LINES,
@@ -19,6 +24,7 @@ public class OpenBracket extends Bracket {
 			'm', Pattern.MULTILINE,
 			's', Pattern.DOTALL,
 			'u', Pattern.UNICODE_CASE,
+			'U', Pattern.UNICODE_CHARACTER_CLASS,
 			'c', 0, // TODO
 	});
 	
