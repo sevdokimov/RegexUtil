@@ -5,8 +5,8 @@ document.write("<div id='tBar'>" +
                "        </a>" +
                "    </div>" +
                "    <div class='out'>" +
-               "        <a href='eclipsePlugin.html'>" +
-               "            <div>Eclipse Plugin</div>" +
+               "        <a href='https://plugins.jetbrains.com/plugin/18857-friendly-terminal'>" +
+               "            <div>SSH Client for IntelliJ IDE</div>" +
                "        </a>" +
                "    </div>" +
                "    <div class='out'>" +
