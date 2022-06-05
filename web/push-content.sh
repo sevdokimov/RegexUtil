@@ -1,0 +1,1 @@
+rsync -lr content/ srv14560@ssh-srv14560.ht-systems.ru:~/htdocs
