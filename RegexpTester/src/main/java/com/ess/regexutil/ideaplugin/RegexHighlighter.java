@@ -152,8 +152,6 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
         RegExpFile file = (RegExpFile) PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
 
         int groupIdx = groupAtCaret(file, offset);
-        if (groupIdx < 0 && offset > 0)
-            groupIdx = groupAtCaret(file, offset - 1);
 
         groupSelectListener.accept(groupIdx);
 

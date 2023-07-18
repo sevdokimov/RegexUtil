@@ -1,21 +1,14 @@
 <idea-plugin url="http://myregexp.com/ideaPlugin.html">
     <id>org.intellij.RegexpTester</id>
-    <name>RegexpTester</name>
+    <name>Regexp Tester</name>
 
-    <vendor email="sergey.evdokimov85@gmail.com">Module-E</vendor>
+    <vendor email="sergey.evdokimov85@gmail.com">Sergey Evdokimov</vendor>
 
     <description><![CDATA[
-    Regular Expression Tester for IntelliJ IDEA.<br>
-    Allows you to experiment with Java regular expressions in a dynamic environment.
-            <br>
-    <ul>
-        <li>Full highlighting of regular expression syntax for an easy visual clue (including bracket matching and error detecting)</li>
-        <li>Tooltips with context help will be shown when the mouse is over a part of the regex.</li>
-        <li>Synchronized selection of regular expression and text:
-        Just select part of the regexp to see which part of the text is matched by this part.</li>
-    </ul>
-
-    Functionality of this plugin is available as java-applet at <a href="http://myregexp.com/applet.html">http://myregexp.com/applet.html</a>
+    Regular Expression tester.<br>
+    Helps to experiment with Java regular expressions. Highlights matched text, shows detailed information about matched groups.
+    <br><br>
+    An online version of the regexp tester is available on <a href="http://myregexp.com">http://myregexp.com</a>
 
   ]]></description>
 
