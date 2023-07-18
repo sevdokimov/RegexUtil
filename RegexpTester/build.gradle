@@ -1,0 +1,46 @@
+plugins {
+    id 'org.jetbrains.intellij' version '1.9.0'
+    id 'java'
+}
+
+group 'com.ess'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    maven { url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies" }
+}
+
+dependencies {
+    testImplementation 'org.assertj:assertj-core:3.17.2'
+    testImplementation 'org.mockito:mockito-core:4.4.0'
+}
+
+runIde {
+    systemProperty "idea.ProcessCanceledException", "disabled"
+    systemProperty "idea.debug", "true"
+}
+
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version = project.hasProperty('ideVersion') ? project.ideVersion : '2021.3.3'
+
+    plugins = ['java']
+    
+    sandboxDir = "${project.rootDir}/.idea-sandbox"
+}
+
+patchPluginXml {
+    sinceBuild = "203.1"
+    untilBuild = ""
+
+    changeNotes = """
+"""
+}
+
+test {
+    useJUnit()
+    systemProperty("idea.force.use.core.classloader", "true")
+}

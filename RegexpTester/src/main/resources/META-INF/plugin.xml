@@ -1,0 +1,34 @@
+<idea-plugin url="http://myregexp.com/ideaPlugin.html">
+    <id>org.intellij.RegexpTester</id>
+    <name>RegexpTester</name>
+
+    <vendor email="sergey.evdokimov85@gmail.com">Module-E</vendor>
+
+    <description><![CDATA[
+    Regular Expression Tester for IntelliJ IDEA.<br>
+    Allows you to experiment with Java regular expressions in a dynamic environment.
+            <br>
+    <ul>
+        <li>Full highlighting of regular expression syntax for an easy visual clue (including bracket matching and error detecting)</li>
+        <li>Tooltips with context help will be shown when the mouse is over a part of the regex.</li>
+        <li>Synchronized selection of regular expression and text:
+        Just select part of the regexp to see which part of the text is matched by this part.</li>
+    </ul>
+
+    Functionality of this plugin is available as java-applet at <a href="http://myregexp.com/applet.html">http://myregexp.com/applet.html</a>
+
+  ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="RegexTester" anchor="bottom" secondary="false"
+                    factoryClass="com.ess.regexutil.ideaplugin.RegexpToolWindowFactory"
+                    icon="/icons/icon.png"/>
+
+        <projectService serviceImplementation="com.ess.regexutil.ideaplugin.RegexPanelStateService" />
+    </extensions>
+</idea-plugin>
