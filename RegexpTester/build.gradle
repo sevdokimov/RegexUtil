@@ -27,8 +27,6 @@ runIde {
 intellij {
     version = project.hasProperty('ideVersion') ? project.ideVersion : '2021.3.3'
 
-    plugins = ['java']
-    
     sandboxDir = "${project.rootDir}/.idea-sandbox"
 }
 

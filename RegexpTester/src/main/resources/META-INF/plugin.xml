@@ -15,7 +15,6 @@
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="RegexTester" anchor="bottom" secondary="false"
@@ -23,5 +22,8 @@
                     icon="/icons/toolwindow-icon.png"/>
 
         <projectService serviceImplementation="com.ess.regexutil.ideaplugin.RegexPanelStateService" />
+
+        <regExpLanguageHost forClass="com.ess.regexutil.ideaplugin.FakeRegexpHost"
+                            implementationClass="com.ess.regexutil.ideaplugin.MyJavaRegExpHost"/>
     </extensions>
 </idea-plugin>

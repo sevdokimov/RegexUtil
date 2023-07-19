@@ -1,7 +1,6 @@
 package com.ess.regexutil.ideaplugin;
 
 import com.ess.regexutil.ideaplugin.utils.HeightLimiter;
-import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -39,9 +38,10 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.SmartPointerManager;
+import com.intellij.psi.impl.light.LightElement;
 import com.intellij.psi.impl.source.resolve.FileContextUtil;
-import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.LanguageTextField;
@@ -171,14 +171,11 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
                 editor.getColorsScheme().setEditorFontSize(font.getSize());
                 editor.getSettings().setLineCursorWidth(EditorUtil.getDefaultCaretWidth());
 
-                String classText = "class A{String s = \"xxx\"}";
-                PsiFile file = PsiFileFactory.getInstance(project).createFileFromText("A.java", JavaFileType.INSTANCE, classText);
-
-                PsiLiteralExpressionImpl host = (PsiLiteralExpressionImpl) file.findElementAt(classText.indexOf("xxx")).getParent();
+                FakeRegexpHost fakeRegexpHost = new FakeRegexpHost(PsiManager.getInstance(getProject()));
 
                 PsiFile psiFile = PsiDocumentManager.getInstance(getProject()).getPsiFile(editor.getDocument());
                 assert psiFile != null;
-                psiFile.putUserData(FileContextUtil.INJECTED_IN_ELEMENT, SmartPointerManager.getInstance(project).createSmartPsiElementPointer(host));
+                psiFile.putUserData(FileContextUtil.INJECTED_IN_ELEMENT, SmartPointerManager.getInstance(getProject()).createSmartPsiElementPointer(fakeRegexpHost));
 
                 RegexHighlighter.install(editor, groupIdx -> highlightGroup(resultsPanel.getResult(), -1, groupIdx, false));
 
