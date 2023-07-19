@@ -203,7 +203,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
                 assert result.getOccurrences().size() == 1;
                 matchesTitle.setText("match");
             } else {
-                matchesTitle.setText(String.format("<html><body><b>%d</b> match%s found</body></html>",
+                matchesTitle.setText(String.format("<html><body><b>%d</b> match%s found (move the caret to a match to see details)</body></html>",
                         result.getOccurrences().size(),
                         result.getOccurrences().size() == 1 ? "" : "es"
                         ));
