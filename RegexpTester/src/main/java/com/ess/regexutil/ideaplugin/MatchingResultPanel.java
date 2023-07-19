@@ -17,12 +17,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Segment;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.text.HtmlBuilder;
-import com.intellij.openapi.util.text.HtmlChunk;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.UIUtil;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -372,12 +371,13 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         TextAttributes errorAttr = globalScheme.getAttributes(CodeInsightColors.WRONG_REFERENCES_ATTRIBUTES);
         Color fc = errorAttr.getForegroundColor();
 
-        HtmlChunk.Element errorText = HtmlChunk.text(ex.getDescription()).wrapWith("span");
+        String errorText = StringEscapeUtils.escapeHtml(ex.getDescription());
         if (fc != null) {
-            errorText = errorText.style("color: #" + ColorUtil.toHex(fc));
+            errorText = "<span style=\"" + "color: #" + ColorUtil.toHex(fc) + "\">" + errorText + "</span>";
         }
 
-        HtmlBuilder html = new HtmlBuilder();
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body>");
 
         if (ex.getIndex() >= 0) {
             int lineCount = 0;
@@ -394,13 +394,14 @@ public class MatchingResultPanel extends JPanel implements Disposable {
                 }
             }
 
-            html.append(HtmlChunk.link("#", "[" + (lineCount + 1) + ':' + (ex.getIndex() - lineStart + 1) + ']'));
-            html.appendRaw("&nbsp;");
+            html.append("<a href=\"#\">" + "[" + (lineCount + 1) + ':' + (ex.getIndex() - lineStart + 1) + "]</a>&nbsp;");
         }
         
         html.append(errorText);
 
-        return html.wrapWithHtmlBody().toString();
+        html.append("</body></html>");
+
+        return html.toString();
     }
 
     @Override

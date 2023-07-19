@@ -114,7 +114,7 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
     }
 
     protected static void waitFor(Callable<Boolean> condition, @Nullable Runnable onFailure) {
-        ApplicationManager.getApplication().assertIsNonDispatchThread();
+        assert !ApplicationManager.getApplication().isDispatchThread();
 
         long startTime = System.currentTimeMillis();
 

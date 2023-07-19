@@ -31,7 +31,7 @@ intellij {
 }
 
 patchPluginXml {
-    sinceBuild = "203.1"
+    sinceBuild = "202.6948"
     untilBuild = ""
 
     changeNotes = """

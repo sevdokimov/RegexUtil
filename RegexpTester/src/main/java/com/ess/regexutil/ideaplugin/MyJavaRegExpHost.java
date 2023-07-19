@@ -370,7 +370,6 @@ public class MyJavaRegExpHost implements RegExpLanguageHost {
         return myPropertiesProvider.getKnownCharacterClasses();
     }
 
-    @Override
     public boolean belongsToConditionalExpression(@NotNull PsiElement psiElement) {
         return false;
     }

@@ -6,8 +6,6 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.CheckboxAction;
 import com.intellij.openapi.actionSystem.ex.ComboBoxAction;
 import com.intellij.openapi.project.DumbAware;
-import com.intellij.openapi.util.text.HtmlBuilder;
-import com.intellij.openapi.util.text.HtmlChunk;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.util.ui.JBUI;
@@ -76,29 +74,30 @@ public class FlagPanelAction extends ComboBoxAction implements DumbAware {
 
         presentation.setDescription("Flags used in the regular expression");
 
-        HtmlBuilder html = new HtmlBuilder();
-        html.append("Flags ");
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body>Flags ");
 
         if (flags == 0) {
-            html.appendRaw("<i>none</i>");
+            html.append("<i>none</i>");
         } else {
-            StringBuilder flagsStr = new StringBuilder();
+            html.append("(<b>");
+
             for (Triple<String, Character, Integer> flag : FLAGS) {
                 if ((flags & flag.getThird()) != 0) {
                     if (flag.getSecond() != null) {
-                        flagsStr.append(flag.getSecond());
+                        html.append(flag.getSecond());
                     } else {
-                        flagsStr.append(flag.getFirst().charAt(0));
+                        html.append(flag.getFirst().charAt(0));
                     }
                 }
             }
 
-            html.append("(");
-            html.append(HtmlChunk.text(flagsStr.toString()).wrapWith("b"));
-            html.append(")");
+            html.append("</b>)");
         }
 
-        presentation.setText(html.wrapWithHtmlBody().toString());
+        html.append("</body></html>");
+        
+        presentation.setText(html.toString());
     }
 
     @Override
