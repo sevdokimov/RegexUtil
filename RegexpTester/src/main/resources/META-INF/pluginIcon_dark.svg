@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <path fill="url(#icon-gradient)" fill-rule="evenodd" d="M6,7 L34,7 C35.1045695,7 36,7.8954305 36,9 L36,31 C36,32.1045695 35.1045695,33 34,33 L6,33 C4.8954305,33 4,32.1045695 4,31 L4,9 C4,7.8954305 4.8954305,7 6,7 Z"/>
+
+  <path fill="#EEEEEE" d="M23,12 24,12 24,17 29,17 29,18 24,18 24,23 23,23 23,18 18,18 18,17 23,17 " />
+
+  <path fill="#EEEEEE" transform="rotate(-45 23.5 17.5)"
+        d="M23,12 24,12 24,17 29,17 29,18 24,18 24,23 23,23 23,18 18,18 18,17 23,17 " />
+
+  <circle fill="#EEEEEE" cx="14" cy="26" r="2"/>
+
+  <defs>
+    <linearGradient id="icon-gradient" x1="16.748%" x2="47.286%" y1="-3.61%" y2="85.907%">
+      <stop offset="10%" stop-color="#11eeee"/>
+      <stop offset="90%" stop-color="#087CFA"/>
+    </linearGradient>
+  </defs>
+</svg>
