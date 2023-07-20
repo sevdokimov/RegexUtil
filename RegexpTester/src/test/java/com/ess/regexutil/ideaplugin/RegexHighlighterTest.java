@@ -102,5 +102,54 @@ public class RegexHighlighterTest extends RegexPanelTestBase {
         });
     }
 
+    public void testBackreferenceHighlight() {
+        init("(aaa) \\1", "");
+
+        edt(() -> initRegexEditor());
+
+        edt(() -> {
+            panel.regexEditor.getEditor().getCaretModel().moveToOffset(6);
+
+            assertThat(text(findHighlights(panel.regexEditor.getEditor(), RegexHighlighter.ELEMENT_UNDER_CARET))).containsExactly("(aaa)", "\\1");
+        });
+    }
+
+    public void testNamedBackreferenceHighlight() {
+        init("(?<a>aaa) \\k<a>", "");
+
+        edt(() -> initRegexEditor());
+
+        edt(() -> {
+            panel.regexEditor.getEditor().getCaretModel().moveToOffset(11);
+
+            assertThat(text(findHighlights(panel.regexEditor.getEditor(), RegexHighlighter.ELEMENT_UNDER_CARET))).containsExactly("(?<a>aaa)", "\\k<a>");
+        });
+    }
+
+    public void testBackreferenceAndBracketHighlight() {
+        init("(aaa)\\1", "  aaaaaa");
+
+        edt(() -> initRegexEditor());
+
+        edt(() -> {
+            panel.regexEditor.getEditor().getCaretModel().moveToOffset(5);
+
+            assertThat(text(findHighlights(panel.regexEditor.getEditor(), RegexHighlighter.ELEMENT_UNDER_CARET))).containsExactly();
+            assertThat(getHighlightedText()).containsExactly("aaa");
+        });
+    }
+
+    public void testBackreferenceHighlightError2() {
+        init("\\9 (aaa)", "");
+
+        edt(() -> initRegexEditor());
+
+        edt(() -> {
+            panel.regexEditor.getEditor().getCaretModel().moveToOffset(1);
+
+            assertThat(text(findHighlights(panel.regexEditor.getEditor(), RegexHighlighter.ELEMENT_UNDER_CARET))).containsExactly();
+        });
+    }
+
 
 }

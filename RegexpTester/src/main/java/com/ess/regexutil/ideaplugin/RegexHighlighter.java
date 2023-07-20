@@ -23,7 +23,9 @@ import org.intellij.lang.regexp.RegExpFile;
 import org.intellij.lang.regexp.RegExpTT;
 import org.intellij.lang.regexp.psi.RegExpBranch;
 import org.intellij.lang.regexp.psi.RegExpGroup;
+import org.intellij.lang.regexp.psi.RegExpNamedGroupRef;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -87,7 +89,24 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
         new RegexHighlighter(editor, groupSelectListener);
     }
 
-    private int findGroupIndex(RegExpGroup group) {
+    @Nullable
+    private RegExpGroup findGroupByIndex(RegExpFile file, int groupIdx) {
+        int idx = 1;
+
+        for (RegExpGroup group : file.getGroups()) {
+            if (!group.isCapturing())
+                continue;
+
+            if (idx == groupIdx)
+                return group;
+
+            idx++;
+        }
+
+        return null;
+    }
+
+    private int findGroupByIndex(RegExpGroup group) {
         if (!group.isCapturing())
             return -1;
 
@@ -131,7 +150,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
 
         PsiElement parent = e.getParent();
         if (parent instanceof RegExpGroup)
-            return findGroupIndex((RegExpGroup) parent);
+            return findGroupByIndex((RegExpGroup) parent);
 
         return -1;
     }
@@ -155,7 +174,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
 
         groupSelectListener.accept(groupIdx);
 
-        List<TextRange> ranges = getHighlightRanges(file, offset);
+        List<TextRange> ranges = getHighlightRanges(file, offset, groupIdx >= 0);
 
         BitSet existHighlights = new BitSet(ranges.size());
 
@@ -186,17 +205,51 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
         }
     }
 
-    private List<TextRange> getHighlightRanges(RegExpFile file, int caretOffset) {
+    private List<TextRange> getHighlightRanges(RegExpFile file, int caretOffset, boolean bracketHighlighted) {
         PsiElement element = file.findElementAt(caretOffset);
         if (Utils.isLeafElementOfType(element, RegExpTT.UNION))
             return highlightUnion(element);
 
         if (caretOffset > 0) {
-            element = file.findElementAt(caretOffset - 1);
-            if (Utils.isLeafElementOfType(element, RegExpTT.UNION))
-                return highlightUnion(element);
+            PsiElement prev = file.findElementAt(caretOffset - 1);
+            if (Utils.isLeafElementOfType(prev, RegExpTT.UNION))
+                return highlightUnion(prev);
         }
-        
+
+        if (!bracketHighlighted && Utils.isLeafElementOfType(element, RegExpTT.BACKREF)) {
+            String text = element.getText();
+            assert text.length() > 0 && text.charAt(0) == '\\';
+            int groupIdx = Integer.parseInt(text.substring(1));
+
+            RegExpGroup group = findGroupByIndex(file, groupIdx);
+            if (group != null) {
+                List<TextRange> res = new ArrayList<>();
+                res.add(group.getTextRange());
+                res.add(element.getTextRange());
+                res.sort(SEGMENT_COMPARATOR);
+                return res;
+            }
+        }
+
+        if (!bracketHighlighted && element != null && element.getParent() instanceof RegExpNamedGroupRef) {
+            RegExpNamedGroupRef ref = (RegExpNamedGroupRef) element.getParent();
+            String groupName = ref.getGroupName();
+            if (groupName != null) {
+                List<TextRange> res = new ArrayList<>();
+
+                for (RegExpGroup group : file.getGroups()) {
+                    if (groupName.equals(group.getGroupName())) {
+                        res.add(group.getTextRange());
+                    }
+                }
+
+                res.add(ref.getTextRange());
+                res.sort(SEGMENT_COMPARATOR);
+                
+                return res;
+            }
+        }
+
         return List.of();
     }
 
