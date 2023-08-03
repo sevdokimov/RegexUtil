@@ -1,6 +1,7 @@
 package com.ess.regexutil.ideaplugin;
 
 import com.ess.regexutil.ideaplugin.utils.HeightLimiter;
+import com.ess.regexutil.ideaplugin.utils.Utils;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -8,21 +9,13 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorKind;
-import com.intellij.openapi.editor.EditorSettings;
-import com.intellij.openapi.editor.LogicalPosition;
-import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColors;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.event.CaretEvent;
 import com.intellij.openapi.editor.event.CaretListener;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -36,12 +29,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.SmartPointerManager;
-import com.intellij.psi.impl.light.LightElement;
-import com.intellij.psi.impl.source.resolve.FileContextUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.LanguageTextField;
@@ -49,14 +37,11 @@ import com.intellij.util.concurrency.EdtScheduledExecutorService;
 import com.intellij.util.ui.JBUI;
 import org.intellij.lang.regexp.RegExpFile;
 import org.intellij.lang.regexp.RegExpFileType;
-import org.intellij.lang.regexp.RegExpLanguage;
 import org.intellij.lang.regexp.psi.RegExpGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +85,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
     private FlagPanelAction flagsEditor;
     ComboBox<MatchType> matchTypeCombobox;
 
-    final MatchingResultPanel resultsPanel;
+    MatchingResultPanel resultsPanel;
 
     private String state;
     private Future<?> matchingFuture;
@@ -153,36 +138,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         setLayout(new BorderLayout());
         setBorder(JBUI.Borders.empty(2, 3, 0, 3));
 
-        regexEditor = new LanguageTextField(RegExpLanguage.INSTANCE, project, "", false) {
-            @Override
-            protected @NotNull EditorEx createEditor() {
-                EditorEx editor = super.createEditor();
-
-                editor.getSettings().setUseSoftWraps(false);
-                editor.setHorizontalScrollbarVisible(true);
-                editor.setVerticalScrollbarVisible(true);
-                editor.setBorder(createEditorBorder(true));
-
-                Color editorBackground = EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground();
-                editor.setBackgroundColor(editorBackground);
-
-                Font font = EditorUtil.getEditorFont();
-                editor.getColorsScheme().setEditorFontName(font.getFontName());
-                editor.getColorsScheme().setEditorFontSize(font.getSize());
-                editor.getSettings().setLineCursorWidth(EditorUtil.getDefaultCaretWidth());
-
-                FakeRegexpHost fakeRegexpHost = new FakeRegexpHost(PsiManager.getInstance(getProject()));
-
-                PsiFile psiFile = PsiDocumentManager.getInstance(getProject()).getPsiFile(editor.getDocument());
-                assert psiFile != null;
-                psiFile.putUserData(FileContextUtil.INJECTED_IN_ELEMENT, SmartPointerManager.getInstance(getProject()).createSmartPsiElementPointer(fakeRegexpHost));
-
-                RegexHighlighter.install(editor, groupIdx -> highlightGroup(resultsPanel.getResult(), -1, groupIdx, false));
-
-                return editor;
-            }
-        };
-        regexEditor.setPlaceholder("regular expression");
+        regexEditor = new RegexpTextField(project, groupIdx -> highlightGroup(resultsPanel.getResult(), -1, groupIdx, false));
 
         textEditor = createTextEditor();
 
@@ -219,7 +175,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         add(regexpPanel, BorderLayout.NORTH);
         add(splitter, BorderLayout.CENTER);
 
-        textEditor.setBorder(createEditorBorder(false));
+        textEditor.setBorder(Utils.createEditorBorder(false));
 
         flagsEditor.addListener(x -> onStateChanged());
 
@@ -307,18 +263,13 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         return res;
     }
 
-    private static Border createEditorBorder(boolean bottomBorder) {
-        Border outBorder = JBUI.Borders.customLine(JBColor.border(), 1, 1, bottomBorder ? 1 : 0, 1);
-        Border innerBorder = BorderFactory.createEmptyBorder(1, 3, 0, 0);
-        return new CompoundBorder(outBorder, innerBorder);
-    }
-
     private Editor createTextEditor() {
         Document document = EditorFactory.getInstance().createDocument("");
 
         EditorEx editor = (EditorEx) EditorFactory.getInstance().createEditor(document, this.project, EditorKind.CONSOLE);
 
         editor.setPlaceholder("Test string");
+        editor.setShowPlaceholderWhenFocused(true);
 
         EditorSettings settings = editor.getSettings();
         settings.setAdditionalLinesCount(0);
