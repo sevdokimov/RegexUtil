@@ -287,12 +287,13 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         if (hoverGroup != null)
             hoverGroup.accept(occurrenceIdx, isMouseOn ? 0 : -1);
 
+        TextAttributes replacedTextAttr = replacedEditor.getColorsScheme().getAttributes(REPLACED_ATTR_KEY);
+
         if (isMouseOn) {
-            TextAttributes defAttr = replacedEditor.getColorsScheme().getAttributes(EditorColors.IDENTIFIER_UNDER_CARET_ATTRIBUTES);
-            TextAttributes selectedAttr = replacedEditor.getColorsScheme().getAttributes(REPLACED_ATTR_KEY);
-            h.setTextAttributes(TextAttributes.merge(defAttr, selectedAttr));
+            TextAttributes selectedAttr = replacedEditor.getColorsScheme().getAttributes(EditorColors.IDENTIFIER_UNDER_CARET_ATTRIBUTES);
+            h.setTextAttributes(TextAttributes.merge(selectedAttr, replacedTextAttr));
         } else {
-            h.setTextAttributes(null);
+            h.setTextAttributes(replacedTextAttr);
         }
     }
 
