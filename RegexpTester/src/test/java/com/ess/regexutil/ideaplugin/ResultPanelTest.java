@@ -2,9 +2,14 @@ package com.ess.regexutil.ideaplugin;
 
 import com.ess.regexutil.ideaplugin.utils.HoverEditorListener;
 import com.google.common.collect.Iterables;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.XmlHighlighterColors;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
+import com.intellij.openapi.util.Segment;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -247,6 +252,102 @@ public class ResultPanelTest extends RegexPanelTestBase {
             });
 
             assertThat(findHighlights(panel.regexEditor.getEditor(), RegexpTesterPanel.GROUP_HLT)).isEmpty();
+        });
+    }
+
+    public void testReplaceError() {
+        init("\\d+", " 2023 | +04 | -02");
+
+        edt(() -> {
+            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.replacementInput.setText("a\\");
+        });
+
+        waitForResults();
+
+        edt(() -> {
+            assertResultActivePanel(MatchingResultPanel.CARD_ERROR);
+
+            assertThat(panel.resultsPanel.errorLabel.getText()).contains("Invalid replacement: ", "escaped is missing");
+        });
+    }
+
+    public void testReplaceError2() {
+        init("\\d+", " 2023 | +04 | -02");
+
+        edt(() -> {
+            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.replacementInput.setText("a$9");
+        });
+
+        waitForResults();
+
+        edt(() -> {
+            assertResultActivePanel(MatchingResultPanel.CARD_ERROR);
+
+            assertThat(panel.resultsPanel.errorLabel.getText()).contains("Invalid replacement: ", "No group 9");
+        });
+    }
+
+    public void testReplaceError3() {
+        init("\\d+", " 2023 | +04 | -02");
+
+        edt(() -> {
+            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.replacementInput.setText("a${aaa}");
+        });
+
+        waitForResults();
+
+        edt(() -> {
+            assertResultActivePanel(MatchingResultPanel.CARD_ERROR);
+
+            assertThat(panel.resultsPanel.errorLabel.getText()).contains("Invalid replacement: ", "No group", "aaa");
+        });
+    }
+
+    public void testReplace() {
+        init("([+\\-])?\\d+", " 2023 | +04 | -02");
+
+        edt(() -> {
+            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.replacementInput.setText("($1)");
+        });
+
+        waitForResults();
+
+        edt(() -> {
+            assertResultActivePanel(MatchingResultPanel.CARD_REPLACED);
+
+            checkReplaced(" () | (+) | (-)", "()", "(+)", "(-)");
+
+            panel.replacementInput.setText("X");
+        });
+
+        waitForResults();
+
+        checkReplaced(" X | X | X", "X", "X", "X");
+
+        edt(() -> panel.replacementInput.setText(""));
+
+        waitForResults();
+
+        checkReplaced("  |  | ", "", "", "");
+    }
+
+    private void checkReplaced(String replaced, String ... expectedOccurrences) {
+        invokeLaterIfNeeded(() -> {
+            assertThat(panel.resultsPanel.getResult().getReplaced()).isEqualTo(replaced);
+
+            Editor editor = panel.resultsPanel.replacedEditor;
+            assertThat(editor.getDocument().getText()).isEqualTo(replaced);
+
+            String[] occurrences = Stream.of(editor.getMarkupModel().getAllHighlighters())
+                    .sorted(Segment.BY_START_OFFSET_THEN_END_OFFSET)
+                    .map(s -> TextRange.create(s).substring(replaced))
+                    .toArray(String[]::new);
+
+            assertOrderedEquals(expectedOccurrences, occurrences);
         });
     }
 }

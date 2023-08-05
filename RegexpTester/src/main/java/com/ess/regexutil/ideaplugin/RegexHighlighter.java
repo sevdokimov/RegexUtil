@@ -7,11 +7,7 @@ import com.intellij.openapi.editor.event.CaretEvent;
 import com.intellij.openapi.editor.event.CaretListener;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.editor.markup.EffectType;
-import com.intellij.openapi.editor.markup.HighlighterLayer;
-import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.RangeHighlighter;
-import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Segment;
@@ -33,15 +29,12 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntConsumer;
 
 public class RegexHighlighter implements FocusListener, CaretListener, DocumentListener {
 
     static final Key<Boolean> ELEMENT_UNDER_CARET = Key.create("RegexHighlighter.ELEMENT_UNDER_CARET");
-
-    public static final Comparator<Segment> SEGMENT_COMPARATOR = Comparator.<Segment>comparingInt(Segment::getStartOffset).thenComparingInt(Segment::getEndOffset);
 
     public static final TextAttributes UNION_BRANCH_ATTR = new TextAttributes(null, null,
             new JBColor(new Color(0x50dd40), new Color(88, 120, 75)),
@@ -182,7 +175,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
             if (hlt.getUserData(ELEMENT_UNDER_CARET) == null)
                 continue;
 
-            int idx = Collections.binarySearch(ranges, hlt, SEGMENT_COMPARATOR);
+            int idx = Collections.binarySearch(ranges, hlt, Segment.BY_START_OFFSET_THEN_END_OFFSET);
             if (idx < 0) {
                 editor.getMarkupModel().removeHighlighter(hlt);
             } else {
@@ -226,7 +219,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
                 List<TextRange> res = new ArrayList<>();
                 res.add(group.getTextRange());
                 res.add(element.getTextRange());
-                res.sort(SEGMENT_COMPARATOR);
+                res.sort(Segment.BY_START_OFFSET_THEN_END_OFFSET);
                 return res;
             }
         }
@@ -244,7 +237,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
                 }
 
                 res.add(ref.getTextRange());
-                res.sort(SEGMENT_COMPARATOR);
+                res.sort(Segment.BY_START_OFFSET_THEN_END_OFFSET);
                 
                 return res;
             }

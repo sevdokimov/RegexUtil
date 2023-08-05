@@ -7,9 +7,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.*;
-import com.intellij.openapi.editor.colors.CodeInsightColors;
-import com.intellij.openapi.editor.colors.EditorColorsManager;
-import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.colors.*;
 import com.intellij.openapi.editor.ex.MarkupModelEx;
 import com.intellij.openapi.editor.ex.RangeHighlighterEx;
 import com.intellij.openapi.editor.markup.*;
@@ -20,11 +18,13 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -38,17 +38,22 @@ import java.util.regex.PatternSyntaxException;
 
 public class MatchingResultPanel extends JPanel implements Disposable {
 
+    public static final int INVALID_REPLACEMENT = -1000;
+
     public static final String CARD_PROGRESS = "progress";
     public static final String CARD_EMPTY = "empty";
     public static final String CARD_ERROR = "error";
     public static final String CARD_MATCHES = "matches";
     public static final String CARD_GROUPS = "groups";
+    public static final String CARD_REPLACED = "replaced";
 
     static final Key<Boolean> GROUP_TEXT = Key.create("MatchingResultPanel.GROUP_TEXT");
 
     public static final TextAttributes CURRENT_GROUP_ATTR = new TextAttributes(null, null,
             new JBColor(new Color(0x00bb00), new Color(98, 150, 85)),
             EffectType.BOXED, 0);
+
+    private static final TextAttributesKey REPLACED_ATTR_KEY = EditorColors.LIVE_TEMPLATE_ATTRIBUTES;
 
     private String currentCard = CARD_EMPTY;
 
@@ -74,6 +79,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     });
 
     Editor groupEditor;
+    final Editor replacedEditor;
     private int selectedOccurrence;
 
     public MatchingResultPanel(@NotNull Project project, IntConsumer errorClickListener) {
@@ -82,7 +88,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         JPanel emptyPanel = new JPanel();
         add(emptyPanel, CARD_EMPTY);
 
-        add(new JBLabel("Matching..."), CARD_PROGRESS);
+        JBLabel matching = new JBLabel("Matching...");
+        matching.setBorder(subpanelBorder());
+        add(matching, CARD_PROGRESS);
 
         errorLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         errorLabel.addMouseListener(new MouseAdapter() {
@@ -91,7 +99,15 @@ public class MatchingResultPanel extends JPanel implements Disposable {
                 if (result == null || result.getError() == null)
                     return;
 
-                errorClickListener.accept(result.getError().getIndex());
+                Exception error = result.getError();
+
+                if (error instanceof PatternSyntaxException) {
+                    errorClickListener.accept(((PatternSyntaxException)error).getIndex());
+                    return;
+                }
+
+                if (error instanceof IllegalArgumentException)
+                    errorClickListener.accept(INVALID_REPLACEMENT);
             }
         });
 
@@ -99,10 +115,20 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
         add(createMatchesPanel(), CARD_MATCHES);
         add(createGroupsPanel(project), CARD_GROUPS);
+
+        replacedEditor = createEditor(project);
+        replacedEditor.getSettings().setUseSoftWraps(false);
+        add(replacedEditor.getComponent(), CARD_REPLACED);
+    }
+
+    private static Border subpanelBorder() {
+        return JBUI.Borders.emptyTop(10);
     }
 
     private JComponent createMatchesPanel() {
         JPanel res = new JPanel(new BorderLayout());
+        res.setBorder(subpanelBorder());
+
         res.add(matchesTitle, BorderLayout.PAGE_START);
 
         return res;
@@ -110,6 +136,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     private JComponent createErrorPanel() {
         JPanel error = new JPanel(new BorderLayout());
+        error.setBorder(subpanelBorder());
+
         JPanel errorBox = new JPanel();
         errorBox.setLayout(new BoxLayout(errorBox, BoxLayout.Y_AXIS));
         JLabel errorHeader = new JLabel("<html><body><div style=\"padding-bottom: 5px; font-weight: bold\">Invalid pattern</div></body></html>");
@@ -124,15 +152,12 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         return error;
     }
 
-    private JComponent createGroupsPanel(@NotNull Project project) {
-        JPanel res = new JPanel(new BorderLayout(0, 10));
-        res.add(groupTitle, BorderLayout.PAGE_START);
-
+    private Editor createEditor(@NotNull Project project) {
         Document document = EditorFactory.getInstance().createDocument("");
 
-        groupEditor = EditorFactory.getInstance().createViewer(document, project, EditorKind.CONSOLE);
+        Editor res = EditorFactory.getInstance().createViewer(document, project, EditorKind.CONSOLE);
 
-        EditorSettings settings = groupEditor.getSettings();
+        EditorSettings settings = res.getSettings();
 
         settings.setUseSoftWraps(true);
         settings.setAdditionalLinesCount(0);
@@ -146,9 +171,20 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         settings.setAdditionalPageAtBottom(false);
         settings.setCaretRowShown(false);
 
-        res.add(groupEditor.getComponent(), BorderLayout.CENTER);
+        HoverEditorListener.install(res);
 
-        HoverEditorListener.install(groupEditor);
+        return res;
+    }
+
+    private JComponent createGroupsPanel(@NotNull Project project) {
+        JPanel res = new JPanel(new BorderLayout(0, 10));
+        res.setBorder(subpanelBorder());
+
+        res.add(groupTitle, BorderLayout.PAGE_START);
+
+        groupEditor = createEditor(project);
+
+        res.add(groupEditor.getComponent(), BorderLayout.CENTER);
 
         return res;
     }
@@ -195,6 +231,13 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             return;
         }
 
+        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE) {
+            showReplacedText();
+
+            select(CARD_REPLACED);
+            return;
+        }
+
         if (result.getOccurrences().isEmpty()) {
             matchesTitle.setText("no match");
         } else {
@@ -216,11 +259,51 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         }
     }
 
+    private void showReplacedText() {
+        assert result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE;
+        assert result.getReplaced() != null;
+
+        replacedEditor.getMarkupModel().removeAllHighlighters();
+
+        WriteAction.run(() -> replacedEditor.getDocument().setText(result.getReplaced()));
+
+        List<MatchResult.Occurrence> occurrences = result.getOccurrences();
+        
+        for (int i = 0; i < occurrences.size(); i++) {
+            MatchResult.Occurrence occurrence = occurrences.get(i);
+
+            TextRange range = occurrence.getReplacementRange();
+
+            RangeHighlighter hlt = replacedEditor.getMarkupModel()
+                    .addRangeHighlighter(REPLACED_ATTR_KEY, range.getStartOffset(), range.getEndOffset(),
+                            HighlighterLayer.WARNING, HighlighterTargetArea.EXACT_RANGE);
+
+            int occurrenceIdx = i;
+            hlt.putUserData(HoverEditorListener.ON_HOVER_KEY, (h, isMouseOn) -> replacedHover(h, isMouseOn, occurrenceIdx));
+        }
+    }
+
+    private void replacedHover(RangeHighlighterEx h, Boolean isMouseOn, int occurrenceIdx) {
+        if (hoverGroup != null)
+            hoverGroup.accept(occurrenceIdx, isMouseOn ? 0 : -1);
+
+        if (isMouseOn) {
+            TextAttributes defAttr = replacedEditor.getColorsScheme().getAttributes(EditorColors.IDENTIFIER_UNDER_CARET_ATTRIBUTES);
+            TextAttributes selectedAttr = replacedEditor.getColorsScheme().getAttributes(REPLACED_ATTR_KEY);
+            h.setTextAttributes(TextAttributes.merge(defAttr, selectedAttr));
+        } else {
+            h.setTextAttributes(null);
+        }
+    }
+
     public int getSelectedOccurrence() {
         return selectedOccurrence;
     }
 
     public void selectOccurrence(int occurrenceIdx) {
+        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE)
+            return;
+
         if (selectedOccurrence == occurrenceIdx)
             return;
 
@@ -366,35 +449,48 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         this.textSelection = textSelection;
     }
 
-    static String renderError(PatternSyntaxException ex) {
+    static String renderError(Exception ex) {
         EditorColorsScheme globalScheme = EditorColorsManager.getInstance().getGlobalScheme();
         TextAttributes errorAttr = globalScheme.getAttributes(CodeInsightColors.WRONG_REFERENCES_ATTRIBUTES);
         Color fc = errorAttr.getForegroundColor();
 
-        String errorText = StringEscapeUtils.escapeHtml(ex.getDescription());
+        String errorText;
+
+        if (ex instanceof PatternSyntaxException) {
+            errorText = ((PatternSyntaxException)ex).getDescription();
+        } else if (ex instanceof IllegalArgumentException) {
+            errorText = ex.getMessage();
+        } else {
+            errorText = "Failed to match text, see logs for details";
+        }
+
         if (fc != null) {
-            errorText = "<span style=\"" + "color: #" + ColorUtil.toHex(fc) + "\">" + errorText + "</span>";
+            errorText = "<span style=\"" + "color: #" + ColorUtil.toHex(fc) + "\">" + StringEscapeUtils.escapeHtml(errorText) + "</span>";
         }
 
         StringBuilder html = new StringBuilder();
         html.append("<html><body>");
 
-        if (ex.getIndex() >= 0) {
-            int lineCount = 0;
-            int lineStart = 0;
-            String pattern = ex.getPattern();
-            for (int i = 0; i < ex.getIndex(); i++) {
-                if (i >= pattern.length())
-                    break;
+        if (ex instanceof PatternSyntaxException) {
+            int index = ((PatternSyntaxException) ex).getIndex();
 
-                char a = pattern.charAt(i);
-                if (a == '\n') {
-                    lineStart = i + 1;
-                    lineCount++;
+            if (index >= 0) {
+                int lineCount = 0;
+                int lineStart = 0;
+                String pattern = ((PatternSyntaxException)ex).getPattern();
+                for (int i = 0; i < index; i++) {
+                    if (i >= pattern.length())
+                        break;
+
+                    char a = pattern.charAt(i);
+                    if (a == '\n') {
+                        lineStart = i + 1;
+                        lineCount++;
+                    }
                 }
-            }
 
-            html.append("<a href=\"#\">" + "[" + (lineCount + 1) + ':' + (ex.getIndex() - lineStart + 1) + "]</a>&nbsp;");
+                html.append("<a href=\"#\">" + "[").append(lineCount + 1).append(':').append(index - lineStart + 1).append("]</a>&nbsp;");
+            }
         }
         
         html.append(errorText);
@@ -409,6 +505,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         if (groupEditor != null) {
             EditorFactory.getInstance().releaseEditor(groupEditor);
             groupEditor = null;
+        }
+        if (replacedEditor != null) {
+            EditorFactory.getInstance().releaseEditor(replacedEditor);
         }
     }
 }

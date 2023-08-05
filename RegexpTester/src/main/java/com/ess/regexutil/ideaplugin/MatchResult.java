@@ -14,30 +14,38 @@ import java.util.regex.PatternSyntaxException;
 
 public class MatchResult {
 
-    private PatternSyntaxException error;
+    private Exception error;
 
     private final RegexpTesterPanel.MatchType matchType;
     private final List<Occurrence> occurrences;
     private final List<Pair<TextRange, String>> groupPositions;
 
     private final String text;
+    private final String replaced;
 
-    public MatchResult(RegexpTesterPanel.MatchType matchType, String text, List<Occurrence> occurrences, List<Pair<TextRange, String>> groupPositions) {
+    public MatchResult(RegexpTesterPanel.MatchType matchType, String text, List<Occurrence> occurrences, List<Pair<TextRange, String>> groupPositions, String replaced) {
         this.matchType = matchType;
         this.text = text;
         this.occurrences = occurrences;
         this.groupPositions = groupPositions;
+        this.replaced = replaced;
     }
 
-    public MatchResult(PatternSyntaxException error) {
+    public MatchResult(@NotNull Exception error) {
         this.error = error;
         matchType = null;
         occurrences = List.of();
         text = "";
         groupPositions = List.of();
+        replaced = null;
     }
 
-    public PatternSyntaxException getError() {
+    @Nullable
+    public String getReplaced() {
+        return replaced;
+    }
+
+    public Exception getError() {
         return error;
     }
 
@@ -68,10 +76,21 @@ public class MatchResult {
             if (error == null || that.error == null)
                 return false;
 
-            return !error.getMessage().equals(that.error.getMessage()) || error.getIndex() != that.error.getIndex();
+            if (error.getClass() != that.error.getClass() || !Objects.equals(error.getMessage(), that.error.getMessage()))
+                return false;
+
+            if (error instanceof PatternSyntaxException
+                    && ((PatternSyntaxException)error).getIndex() != ((PatternSyntaxException)that.error).getIndex()) {
+                return false;
+            }
+
+            return true;
         }
 
         if (!Objects.equals(text, that.text))
+            return false;
+
+        if (!Objects.equals(replaced, that.replaced))
             return false;
 
         if (!Objects.equals(matchType, that.matchType))
@@ -153,7 +172,13 @@ public class MatchResult {
 
         private final List<MatchGroup> groups = new ArrayList<>();
 
+        private final TextRange replacementRange;
+
         public Occurrence(Matcher matcher, List<Pair<TextRange, String>> groupPositions) {
+            this(matcher, groupPositions, null);
+        }
+
+        public Occurrence(Matcher matcher, List<Pair<TextRange, String>> groupPositions, @Nullable TextRange replacementRange) {
             super(matcher.start(), matcher.end());
 
             assert groupPositions.size() == matcher.groupCount();
@@ -165,18 +190,27 @@ public class MatchResult {
 
                 groups.add(new MatchGroup(name, i, matcher.start(i), matcher.end(i)));
             }
+
+            this.replacementRange = replacementRange;
         }
 
         public List<MatchGroup> getGroups() {
             return groups;
         }
 
+        public TextRange getReplacementRange() {
+            return replacementRange;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
 
+            Occurrence occurrence = (Occurrence) o;
+
             return super.equals(o)
-                    && groups.equals(((Occurrence) o).groups);
+                    && Objects.equals(replacementRange, occurrence.replacementRange)
+                    && groups.equals((occurrence).groups);
         }
 
         @Override

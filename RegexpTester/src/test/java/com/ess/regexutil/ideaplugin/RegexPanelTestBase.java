@@ -15,6 +15,7 @@ import com.intellij.openapi.editor.ex.RangeHighlighterEx;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.registry.Registry;
+import com.intellij.ui.LanguageTextField;
 import com.intellij.util.ThrowableRunnable;
 import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.MagicConstant;
@@ -74,6 +75,7 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
             MatchingResultPanel.CARD_ERROR,
             MatchingResultPanel.CARD_PROGRESS,
             MatchingResultPanel.CARD_EMPTY,
+            MatchingResultPanel.CARD_REPLACED,
     }) String resultPanel) {
         assertThat(panel.resultsPanel.getCurrentCard()).isEqualTo(resultPanel);
     }
@@ -277,7 +279,11 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
     }
 
     protected void initRegexEditor() {
-        runWithFlag("editor.text.field.init.on.shown", false, () -> panel.regexEditor.addNotify());
+        initEditor(panel.regexEditor);
+    }
+
+    protected void initEditor(LanguageTextField field) {
+        runWithFlag("editor.text.field.init.on.shown", false, () -> field.addNotify());
     }
 
     protected void runWithFlag(String name, boolean value, Runnable run) {

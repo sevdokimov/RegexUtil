@@ -81,6 +81,8 @@ public class RegexPanelStateService implements PersistentStateComponent<RegexPan
         @Attribute
         private String text;
         @Attribute
+        private String replacement;
+        @Attribute
         private int flags;
         @Attribute
         private RegexpTesterPanel.MatchType matchType;
@@ -117,12 +119,24 @@ public class RegexPanelStateService implements PersistentStateComponent<RegexPan
             this.matchType = matchType;
         }
 
+        public String getReplacement() {
+            return replacement;
+        }
+
+        public void setReplacement(String replacement) {
+            this.replacement = replacement;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof State)) return false;
             State state = (State) o;
-            return flags == state.flags && Objects.equals(regexp, state.regexp) && Objects.equals(text, state.text) && matchType == state.matchType;
+            return flags == state.flags
+                    && Objects.equals(regexp, state.regexp)
+                    && Objects.equals(text, state.text)
+                    && Objects.equals(replacement, state.replacement)
+                    && matchType == state.matchType;
         }
 
         @Override
