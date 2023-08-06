@@ -36,6 +36,7 @@ public class RegexpTextField extends LanguageTextField {
         editor.setHorizontalScrollbarVisible(true);
         editor.setVerticalScrollbarVisible(true);
         editor.setBorder(Utils.createEditorBorder(true));
+        editor.putUserData(Utils.getCheckRegexpEditorKey(), true);
 
         Color editorBackground = EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground();
         editor.setBackgroundColor(editorBackground);
