@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.ess'
-version '2.1.0'
+version '2.1.1'
 
 repositories {
     mavenCentral()
@@ -35,7 +35,7 @@ patchPluginXml {
     untilBuild = ""
 
     changeNotes = """
-Add "Replace" mode allowing replace substrings matches a pattern.
+Bug fixing.
 """
 }
 
