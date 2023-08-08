@@ -105,8 +105,6 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
     private Future<?> matchingFuture;
 
     public void saveState(@NotNull RegexPanelStateService.State res) {
-        ApplicationManager.getApplication().assertIsDispatchThread();
-
         res.setRegexp(regexEditor.getText());
         res.setText(textEditor.getDocument().getText());
         res.setReplacement(replacementInput.getText());
