@@ -85,7 +85,7 @@ public class RegexPanelStateService implements PersistentStateComponent<RegexPan
         @Attribute
         private int flags;
         @Attribute
-        private RegexpTesterPanel.MatchType matchType;
+        private MatchType matchType;
 
         public String getRegexp() {
             return unescape(regexp);
@@ -111,11 +111,11 @@ public class RegexPanelStateService implements PersistentStateComponent<RegexPan
             this.flags = flags;
         }
 
-        public RegexpTesterPanel.MatchType getMatchType() {
+        public MatchType getMatchType() {
             return matchType;
         }
 
-        public void setMatchType(RegexpTesterPanel.MatchType matchType) {
+        public void setMatchType(MatchType matchType) {
             this.matchType = matchType;
         }
 

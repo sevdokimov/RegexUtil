@@ -3,7 +3,6 @@ package com.ess.regexutil.ideaplugin;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
@@ -23,8 +22,6 @@ public class RegexpToolWindowFactory implements ToolWindowFactory, DumbAware {
         project.getService(RegexPanelStateService.class).restoreState(panel);
         
         Content content = ApplicationManager.getApplication().getService(ContentFactory.class).createContent(panel, "", false);
-
-        Disposer.register(content, panel);
 
         toolWindow.getContentManager().addContent(content);
     }

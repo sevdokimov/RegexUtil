@@ -18,6 +18,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -55,6 +56,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     private static final TextAttributesKey REPLACED_ATTR_KEY = EditorColors.LIVE_TEMPLATE_ATTRIBUTES;
 
+    private final MatchingProcessor matchingProcessor;
+
     private String currentCard = CARD_EMPTY;
 
     private MatchResult result;
@@ -70,6 +73,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         UIUtil.applyStyle(UIUtil.ComponentStyle.LARGE, matchesTitle);
     }
 
+    final JButton analyzeButton = new JButton("Find unmatched part");
+
     final JBLableHyprlink groupTitle = new JBLableHyprlink("|", e -> {
         int occurrenceIdx = Integer.parseInt(e.getDescription());
         if (result != null && occurrenceIdx < result.getOccurrences().size()) {
@@ -82,11 +87,12 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     final Editor replacedEditor;
     private int selectedOccurrence;
 
-    public MatchingResultPanel(@NotNull Project project, IntConsumer errorClickListener) {
+    public MatchingResultPanel(@NotNull Project project, IntConsumer errorClickListener, MatchingProcessor matchingProcessor) {
         super(new CardLayout());
 
-        JPanel emptyPanel = new JPanel();
-        add(emptyPanel, CARD_EMPTY);
+        this.matchingProcessor = matchingProcessor;
+
+        add(new JPanel(), CARD_EMPTY);
 
         JBLabel matching = new JBLabel("Matching...");
         matching.setBorder(subpanelBorder());
@@ -119,6 +125,15 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         replacedEditor = createEditor(project);
         replacedEditor.getSettings().setUseSoftWraps(false);
         add(replacedEditor.getComponent(), CARD_REPLACED);
+
+        matchingProcessor.addAnalyzingListener(this::onAnalyzingStateChanged);
+    }
+
+    private void onAnalyzingStateChanged() {
+        analyzeButton.setEnabled(!matchingProcessor.isAnalyzingInProgress());
+
+        RegexpAnalyzer anResult = matchingProcessor.getAnalyzingResult();
+        analyzeButton.setVisible(anResult == null && matchingProcessor.isResultReady() && result.getOccurrences().isEmpty());
     }
 
     private static Border subpanelBorder() {
@@ -126,10 +141,24 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     private JComponent createMatchesPanel() {
-        JPanel res = new JPanel(new BorderLayout());
+        JPanel res = new JPanel(new GridBagLayout());
         res.setBorder(subpanelBorder());
 
-        res.add(matchesTitle, BorderLayout.PAGE_START);
+        GridBag gb = new GridBag();
+        gb.setDefaultWeightX(1);
+        gb.setDefaultAnchor(GridBagConstraints.WEST);
+
+        gb.nextLine();
+        res.add(matchesTitle, gb);
+
+        gb.nextLine().insetTop(15);
+
+        analyzeButton.addActionListener(e -> matchingProcessor.findUnmatched());
+        res.add(analyzeButton, gb);
+
+        gb.nextLine();
+        gb.weighty = 1;
+        res.add(Box.createGlue(), gb);
 
         return res;
     }
@@ -231,7 +260,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             return;
         }
 
-        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE) {
+        if (result.getMatchType() == MatchType.REPLACE) {
             showReplacedText();
 
             select(CARD_REPLACED);
@@ -239,9 +268,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         }
 
         if (result.getOccurrences().isEmpty()) {
-            matchesTitle.setText("no match");
+            matchesTitle.setText("<html><body><b>&nbsp;no match</b></body></html>");
         } else {
-            if (result.getMatchType() == RegexpTesterPanel.MatchType.ENTIRE_STRING || result.getMatchType() == RegexpTesterPanel.MatchType.BEGINNING) {
+            if (result.getMatchType() == MatchType.ENTIRE_STRING || result.getMatchType() == MatchType.BEGINNING) {
                 assert result.getOccurrences().size() == 1;
                 matchesTitle.setText("match");
             } else {
@@ -252,6 +281,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             }
         }
 
+        onAnalyzingStateChanged();
+
         if (result.getOccurrences().size() == 1) {
             selectOccurrence(0);
         } else {
@@ -260,7 +291,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     private void showReplacedText() {
-        assert result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE;
+        assert result.getMatchType() == MatchType.REPLACE;
         assert result.getReplaced() != null;
 
         replacedEditor.getMarkupModel().removeAllHighlighters();
@@ -302,7 +333,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     public void selectOccurrence(int occurrenceIdx) {
-        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE)
+        if (result.getMatchType() == MatchType.REPLACE)
             return;
 
         if (selectedOccurrence == occurrenceIdx)

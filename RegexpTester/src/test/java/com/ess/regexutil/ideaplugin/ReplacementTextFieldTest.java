@@ -13,7 +13,7 @@ public class ReplacementTextFieldTest extends RegexPanelTestBase {
 
     public void testHighlightOnEditorInitializing() {
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("_$1_");
 
             assertThat(panel.replacementInput.getEditor()).isNull();
@@ -26,7 +26,7 @@ public class ReplacementTextFieldTest extends RegexPanelTestBase {
 
     public void testRehighlightOnTextChange() {
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("_$1_");
             initEditor(panel.replacementInput);
 
@@ -43,7 +43,7 @@ public class ReplacementTextFieldTest extends RegexPanelTestBase {
 
     public void testHighlighting() {
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             initEditor(panel.replacementInput);
 
             doTestHighlighting("", Map.of());

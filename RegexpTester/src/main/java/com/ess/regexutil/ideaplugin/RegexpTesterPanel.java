@@ -8,9 +8,7 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.event.CaretEvent;
@@ -46,19 +44,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposable {
-
-    private static final Logger log = Logger.getInstance(RegexpTesterPanel.class);
+public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposable, Supplier<State> {
 
     static final Key<Boolean> GROUP_HLT = Key.create("RegexpTesterPanel.GROUP_HLT");
+
+    static final Key<Boolean> MATCHED_PARTS = Key.create("RegexpTesterPanel.MATCHED_PARTS");
 
     static final Key<Integer> MATCH_IDX = Key.create("RegexpTesterPanel.MATCH_IDX");
 
@@ -74,7 +69,13 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
             new JBColor(new Color(0xE0E0C0), new Color(0x505050)),
             null, null, 0);
 
-    public static int REHIGHLIGHT_DELAY = 30;
+    private static final TextAttributes MATCHED_REGEXP = new TextAttributes(null,
+            new JBColor(new Color(0xD0FFD0), new Color(0x306030)),
+            null, null, 0);
+
+    private static final TextAttributes MATCHED_REGEXP_2 = MATCHED_REGEXP;
+
+    private static final TextAttributes MATCHED_TEXT = MATCHED_REGEXP;
 
     private final Project project;
     final Editor textEditor;
@@ -92,8 +93,6 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
 
     private boolean disposed;
 
-    private long rehighlightTime;
-
     final LanguageTextField regexEditor;
 
     private FlagPanelAction flagsEditor;
@@ -101,8 +100,9 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
 
     MatchingResultPanel resultsPanel;
 
-    private String state;
-    private Future<?> matchingFuture;
+    protected final MatchingProcessor matchingProcessor;
+
+    private ScheduledFuture<?> clearResultsPaneFuture;
 
     public void saveState(@NotNull RegexPanelStateService.State res) {
         res.setRegexp(regexEditor.getText());
@@ -130,23 +130,6 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         matchTypeCombobox.setItem(matchType);
     }
 
-    public enum MatchType {
-        SUBSTRING("Substring"), ENTIRE_STRING("Entire string"), BEGINNING("From the beginning"),
-        REPLACE("Replace");
-
-        MatchType(String title) {
-            this.title = title;
-        }
-
-        private final String title;
-
-
-        @Override
-        public String toString() {
-            return title;
-        }
-    }
-
     public RegexpTesterPanel(@NotNull Project project) {
         super(false, false);
         this.project = project;
@@ -164,13 +147,17 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         regexpPanel.add(new HeightLimiter(regexEditor, REGEX_EDITOR_HEIGHT_LIMIT), BorderLayout.CENTER);
         regexpPanel.add(createFlags(), BorderLayout.LINE_END);
 
-        resultsPanel = new MatchingResultPanel(project, this::errorClicked);
+        matchingProcessor = new MatchingProcessor(this, project);
+        matchingProcessor.addListener(this::onMatchFinished);
+        matchingProcessor.addAnalyzingListener(this::onAnalyzeFinished);
+
+        resultsPanel = new MatchingResultPanel(project, this::errorClicked, matchingProcessor);
         Disposer.register(this, resultsPanel);
 
         resultsPanel.setHoverListener((occurrenceIdx, groupIdx) -> highlightGroup(resultsPanel.getResult(), occurrenceIdx, groupIdx, true));
 
         resultsPanel.setTextSelection(range -> {
-            if (!isResultReady())
+            if (!matchingProcessor.isResultReady())
                 return;
 
             textEditor.getSelectionModel().setSelection(range.getStartOffset(), range.getEndOffset());
@@ -197,23 +184,88 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
 
         textEditor.setBorder(Utils.createEditorBorder(false));
 
-        flagsEditor.addListener(x -> onStateChanged());
+        flagsEditor.addListener(x -> matchingProcessor.onStateChanged());
 
-        DocumentListener documentListener = new DocumentChangeListener(e -> onStateChanged());
+        DocumentListener documentListener = new DocumentChangeListener(e -> matchingProcessor.onStateChanged());
 
         textEditor.getDocument().addDocumentListener(documentListener);
         regexEditor.addDocumentListener(documentListener);
         replacementInput.addDocumentListener(documentListener);
     }
 
-    public boolean isResultReady() {
-        ApplicationManager.getApplication().assertIsDispatchThread();
+    private void highlight(@NotNull Editor editor, List<TextRange> ranges, TextAttributes matchedRegexp) {
+        for (TextRange range : ranges) {
+            RangeHighlighter highlighter = editor.getMarkupModel().addRangeHighlighter(
+                    range.getStartOffset(), range.getEndOffset(),
+                    HighlighterLayer.ELEMENT_UNDER_CARET,
+                    matchedRegexp, HighlighterTargetArea.EXACT_RANGE);
 
-        return rehighlightTime == 0 && matchingFuture == null;
+            highlighter.putUserData(MATCHED_PARTS, true);
+        }
+    }
+
+    private void onAnalyzeFinished() {
+        Editor regexEditor = this.regexEditor.getEditor();
+        if (regexEditor != null) {
+            for (RangeHighlighter hlt : regexEditor.getMarkupModel().getAllHighlighters()) {
+                if (hlt.getUserData(MATCHED_PARTS) != null)
+                    regexEditor.getMarkupModel().removeHighlighter(hlt);
+            }
+        }
+
+        for (RangeHighlighter hlt : textEditor.getMarkupModel().getAllHighlighters()) {
+            if (hlt.getUserData(MATCHED_PARTS) != null)
+                textEditor.getMarkupModel().removeHighlighter(hlt);
+        }
+
+        RegexpAnalyzer anResult = matchingProcessor.getAnalyzingResult();
+
+        if (anResult == null || !anResult.getState().equals(get()))
+            return;
+
+        if (regexEditor != null) {
+            highlight(regexEditor, anResult.getMatchedRegexp(), MATCHED_REGEXP);
+
+            highlight(regexEditor, anResult.getAdditionalMatchedRegexp(), MATCHED_REGEXP_2);
+        }
+
+        if (anResult.getMatchedText() != null) {
+            RangeHighlighter highlighter = textEditor.getMarkupModel().addRangeHighlighter(
+                    anResult.getMatchedText().getStartOffset(),
+                    anResult.getMatchedText().getEndOffset(),
+                    HighlighterLayer.ELEMENT_UNDER_CARET,
+                    MATCHED_TEXT, HighlighterTargetArea.EXACT_RANGE);
+
+            highlighter.putUserData(MATCHED_PARTS, true);
+        }
+    }
+
+    private void onMatchFinished(MatchResult result) {
+        if (matchingProcessor.isResultReady()) {
+            if (clearResultsPaneFuture != null) {
+                clearResultsPaneFuture.cancel(true);
+                clearResultsPaneFuture = null;
+            }
+
+            highlightText(matchingProcessor.getResult());
+            resultsPanel.setResult(result);
+        } else {
+            if (clearResultsPaneFuture == null && !MatchingResultPanel.CARD_PROGRESS.equals(resultsPanel.getCurrentCard())) {
+                clearResultsPaneFuture = EdtScheduledExecutorService.getInstance().schedule(() -> {
+                    if (disposed || clearResultsPaneFuture == null)
+                        return;
+
+                    clearResultsPaneFuture = null;
+
+                    resultsPanel.setProgressState();
+                    highlightText(null);
+                }, 400, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     private void highlightGroup(MatchResult result, int occurrenceIdx, int groupIdx, boolean highlightInRegexp) {
-        if (!isResultReady())
+        if (!matchingProcessor.isResultReady())
             return;
 
         for (RangeHighlighter hlt : textEditor.getMarkupModel().getAllHighlighters()) {
@@ -261,7 +313,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
     }
 
     private void errorClicked(int errorIndex) {
-        if (!isResultReady())
+        if (!matchingProcessor.isResultReady())
             return;
 
         if (errorIndex == MatchingResultPanel.INVALID_REPLACEMENT && matchTypeCombobox.getItem() == MatchType.REPLACE) {
@@ -290,7 +342,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
 
             revalidate();
 
-            onStateChanged();
+            matchingProcessor.onStateChanged();
         });
 
         panel.add(matchTypeCombobox);
@@ -377,88 +429,6 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         return flagPanel;
     }
 
-    private String currentState() {
-        return flagsEditor.getFlags()
-                + "_" + textEditor.getDocument().getModificationStamp()
-                + '_' + regexEditor.getDocument().getModificationStamp()
-                + '_' + replacementInput.getDocument().getModificationStamp()
-                + '_' + matchTypeCombobox.getItem().ordinal();
-    }
-
-    private void rehighlight() {
-        if (disposed)
-            return;
-
-        long delay = rehighlightTime - System.currentTimeMillis();
-        if (delay > 0) {
-            EdtScheduledExecutorService.getInstance().schedule(this::rehighlight, ModalityState.NON_MODAL, delay, TimeUnit.MILLISECONDS);
-            return;
-        }
-
-        rehighlightTime = 0;
-
-        String stateId = currentState();
-
-        if (stateId.equals(state))
-            return;
-
-        state = stateId;
-
-        if (matchingFuture != null)
-            matchingFuture.cancel(true);
-
-        MatchResult outdatedResult = resultsPanel.getResult();
-
-        ScheduledFuture<?> clearResultsPaneFuture = EdtScheduledExecutorService.getInstance().schedule(() -> {
-            if (disposed)
-                return null;
-
-            if (outdatedResult == resultsPanel.getResult()) {
-                resultsPanel.setProgressState();
-                highlightText(null);
-            }
-            return null;
-        }, 400, TimeUnit.MILLISECONDS);
-
-        int flags = flagsEditor.getFlags();
-        String regex = regexEditor.getText();
-        String text = textEditor.getDocument().getText();
-        String replacement = replacementInput.getText();
-        MatchType matchType = matchTypeCombobox.getItem();
-        List<Pair<TextRange, String>> groups = parseGroups(regexEditor);
-
-        matchingFuture = ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            if (Thread.interrupted())
-                return;
-
-            MatchResult result;
-
-            try {
-                result = match(regex, groups, flags, text, replacement, matchType);
-            } catch (Exception e) {
-                log.error("Failed to match text", e);
-                result = new MatchResult(e);
-            }
-
-            if (Thread.interrupted())
-                return;
-
-            clearResultsPaneFuture.cancel(true);
-
-            MatchResult resultFinal = result;
-
-            ApplicationManager.getApplication().invokeLater(() -> {
-                if (!stateId.equals(state))
-                    return;
-
-                matchingFuture = null;
-
-                resultsPanel.setResult(resultFinal);
-                highlightText(resultFinal);
-            });
-        });
-    }
-
     private List<Pair<TextRange, String>> parseGroups(LanguageTextField regexEditor) {
         RegExpFile psiFile;
 
@@ -483,17 +453,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         return res;
     }
 
-    private void onStateChanged() {
-        ApplicationManager.getApplication().assertIsDispatchThread();
 
-        boolean rehighlightScheduled = rehighlightTime != 0;
-
-        rehighlightTime = System.currentTimeMillis() + REHIGHLIGHT_DELAY;
-
-        if (!rehighlightScheduled) {
-            EdtScheduledExecutorService.getInstance().schedule(this::rehighlight, ModalityState.NON_MODAL, REHIGHLIGHT_DELAY, TimeUnit.MILLISECONDS);
-        }
-    }
 
     private void highlightText(@Nullable MatchResult result) {
         List<MatchResult.Occurrence> occurrences = result == null ? List.of() : result.getOccurrences();
@@ -513,7 +473,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
     }
 
     private void onCaretMove(int offset) {
-        if (!isResultReady())
+        if (!matchingProcessor.isResultReady())
             return;
 
         MatchResult result = resultsPanel.getResult();
@@ -536,84 +496,14 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         }
     }
 
-    @Nullable
-    private MatchResult match(String regex, List<Pair<TextRange, String>> groupPositions, int flags, String text, String replacement, MatchType matchType) {
-        if (regex.isEmpty())
-            return null;
-
-        Pattern pattern;
-        
-        try {
-            pattern = Pattern.compile(regex, flags);
-        } catch (PatternSyntaxException e) {
-            return new MatchResult(e);
-        }
-
-        Matcher matcher = pattern.matcher(text);
-
-        List<MatchResult.Occurrence> groups = new ArrayList<>();
-        String replaced = null;
-
-        switch (matchType) {
-            case ENTIRE_STRING: {
-                if (matcher.matches()) {
-                    groups.add(new MatchResult.Occurrence(matcher, groupPositions));
-                }
-
-                break;
-            }
-
-            case BEGINNING: {
-                if (matcher.lookingAt()) {
-                    groups.add(new MatchResult.Occurrence(matcher, groupPositions));
-                }
-
-                break;
-            }
-            case REPLACE: {
-                StringBuilder replacedBuff = new StringBuilder();
-                int lastAppendPosition = 0;
-
-                while (matcher.find()) {
-                    int replacedStart = replacedBuff.length() + (matcher.start() - lastAppendPosition);
-
-                    try {
-                        matcher.appendReplacement(replacedBuff, replacement);
-                    } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
-                        return new MatchResult(new IllegalArgumentException("Invalid replacement: " + e.getMessage(), e));
-                    }
-
-                    lastAppendPosition = matcher.end();
-
-                    groups.add(new MatchResult.Occurrence(matcher, groupPositions, new TextRange(replacedStart, replacedBuff.length())));
-                    if (Thread.currentThread().isInterrupted())
-                        return null;
-                }
-
-                replaced = replacedBuff.toString();
-
-                break;
-            }
-            case SUBSTRING: {
-                while (matcher.find()) {
-                    groups.add(new MatchResult.Occurrence(matcher, groupPositions));
-                    if (Thread.currentThread().isInterrupted())
-                        return null;
-                }
-
-                break;
-            }
-
-            default:
-                throw new IllegalStateException();
-        }
-
-        return new MatchResult(matchType, text, groups, groupPositions, replaced);
-    }
-
     @Override
     public void dispose() {
+        if (disposed)
+            return;
+
         disposed = true;
+
+        matchingProcessor.dispose();
 
         if (textEditor != null)
             EditorFactory.getInstance().releaseEditor(textEditor);
@@ -635,5 +525,19 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
         JPanel res = new JPanel(new BorderLayout());
         res.add(component, BorderLayout.NORTH);
         return res;
+    }
+
+    @Override
+    public State get() {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+
+        return new State(
+                regexEditor.getText(),
+                textEditor.getDocument().getText(),
+                replacementInput.getText(),
+                flagsEditor.getFlags(),
+                matchTypeCombobox.getItem(),
+                parseGroups(regexEditor)
+        );
     }
 }
