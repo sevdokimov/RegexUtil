@@ -75,7 +75,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         UIUtil.applyStyle(UIUtil.ComponentStyle.LARGE, matchesTitle);
     }
 
-    final JButton analyzeButton = new JButton("Find unmatched part");
+    final JButton analyzeButton = new JButton("Find Unmatched Part");
     final JPanel analyzePanel = new JPanel(new CardLayout());
 
     final JBLableHyprlink groupTitle = new JBLableHyprlink("|", e -> {
@@ -156,10 +156,19 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
         JLabel legend = new JBLableHyprlink("" +
                 "<html><body>" +
-                "<div style=\"padding: 10px; background: " + ColorUtil.toHtmlColor(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()) + "\">" +
-                "<span style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor()) + "\">***</span> - matched part of the regex" +
-                "<br>" +
-                "<br>" +
+
+                "<div style=\"padding: 5px; background: " + ColorUtil.toHtmlColor(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()) + "\">" +
+
+                "<table cellpadding=\"0\" cellspacing=\"5\">" +
+                "  <tr>" +
+                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor()) + "\">***</td>" +
+                "    <td> - matched part of the regex</td>" +
+                "  </tr>" +
+                "  <tr>" +
+                "    <td style=\"border: 1px solid " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getEffectColor()) + "; background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getBackgroundColor()) + "\">***</td>" +
+                "    <td> - blocker</td>" +
+                "  </tr>" +
+                "</table>" +
                 "<a href=\"clear\">clear</a>" +
                 "</div>" +
                 "</body></html>", e -> matchingProcessor.clearAnalyzeResult());
