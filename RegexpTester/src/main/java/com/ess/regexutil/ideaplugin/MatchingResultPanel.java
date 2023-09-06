@@ -18,7 +18,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.util.ui.GridBag;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -48,6 +47,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     public static final String CARD_GROUPS = "groups";
     public static final String CARD_REPLACED = "replaced";
 
+    public static final String CARD_AN_BUTTON = "button";
+    public static final String CARD_AN_RESULTS = "res";
+
     static final Key<Boolean> GROUP_TEXT = Key.create("MatchingResultPanel.GROUP_TEXT");
 
     public static final TextAttributes CURRENT_GROUP_ATTR = new TextAttributes(null, null,
@@ -74,6 +76,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     final JButton analyzeButton = new JButton("Find unmatched part");
+    final JPanel analyzePanel = new JPanel(new CardLayout());
 
     final JBLableHyprlink groupTitle = new JBLableHyprlink("|", e -> {
         int occurrenceIdx = Integer.parseInt(e.getDescription());
@@ -131,9 +134,11 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     private void onAnalyzingStateChanged() {
         analyzeButton.setEnabled(!matchingProcessor.isAnalyzingInProgress());
+        analyzeButton.setVisible(matchingProcessor.isResultReady() && result.getOccurrences().isEmpty());
 
         RegexpAnalyzer anResult = matchingProcessor.getAnalyzingResult();
-        analyzeButton.setVisible(anResult == null && matchingProcessor.isResultReady() && result.getOccurrences().isEmpty());
+
+        ((CardLayout) analyzePanel.getLayout()).show(analyzePanel, anResult == null ? CARD_AN_BUTTON : CARD_AN_RESULTS);
     }
 
     private static Border subpanelBorder() {
@@ -141,24 +146,27 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     private JComponent createMatchesPanel() {
-        JPanel res = new JPanel(new GridBagLayout());
+        JPanel res = new JPanel(new BorderLayout());
         res.setBorder(subpanelBorder());
 
-        GridBag gb = new GridBag();
-        gb.setDefaultWeightX(1);
-        gb.setDefaultAnchor(GridBagConstraints.WEST);
+        res.add(matchesTitle, BorderLayout.NORTH);
 
-        gb.nextLine();
-        res.add(matchesTitle, gb);
+        JPanel btnPanel = new JPanel(new BorderLayout());
+        btnPanel.add(analyzeButton, BorderLayout.WEST);
 
-        gb.nextLine().insetTop(15);
+        JPanel resultPanel = new JPanel();
+        resultPanel.add(new JLabel("RRR"));
+
+        analyzePanel.add(btnPanel, CARD_AN_BUTTON);
+        analyzePanel.add(resultPanel, CARD_AN_RESULTS);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(JBUI.Borders.emptyTop(15));
+        bottomPanel.add(analyzePanel, BorderLayout.NORTH);
+
+        res.add(bottomPanel, BorderLayout.CENTER);
 
         analyzeButton.addActionListener(e -> matchingProcessor.findUnmatched());
-        res.add(analyzeButton, gb);
-
-        gb.nextLine();
-        gb.weighty = 1;
-        res.add(Box.createGlue(), gb);
 
         return res;
     }
