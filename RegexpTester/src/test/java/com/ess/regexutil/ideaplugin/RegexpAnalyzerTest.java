@@ -23,6 +23,11 @@ public class RegexpAnalyzerTest extends MyBasePlatformTestCase {
         doTest("a[a-z&&[^bc]]b", " a1b!", "a", "a", List.of("[a-z&&[^bc]]"));
         doTest("a\\p{Upper}b", " a1b!", "a", "a", List.of("\\p{Upper}"));
         doTest("a\\p{Upper}b", " aX!", "a\\p{Upper}", "aX", List.of("b"));
+        doTest("^\\d+x", "44", "^\\d+", "44", List.of("x"));
+        doTest("^\\d+x", "_44", "^", "", List.of("\\d+"));
+        doTest("\\d(?:$| )", " 44", "\\d(?:$| )", "4", List.of());
+        doTest("\\d(?:$| )", " 44!!!", "\\d", "4", List.of("$", " "));
+        doTest("\\b\\d+\\b", " 44x!!! 5555x ", "\\b\\d+", "44", List.of("\\b"));
     }
 
     private void doTest(@Language("RegExp") String regexp, String text, String expectedMatchedRegexp, String matchedText, String ... secondaryRegexp) {
