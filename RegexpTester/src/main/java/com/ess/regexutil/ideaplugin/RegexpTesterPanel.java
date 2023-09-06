@@ -69,7 +69,7 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
             new JBColor(new Color(0xE0E0C0), new Color(0x505050)),
             null, null, 0);
 
-    private static final TextAttributes MATCHED_REGEXP = new TextAttributes(null,
+    public static final TextAttributes MATCHED_REGEXP = new TextAttributes(null,
             new JBColor(new Color(0xD0FFD0), new Color(0x224822)),
             null, null, 0);
 

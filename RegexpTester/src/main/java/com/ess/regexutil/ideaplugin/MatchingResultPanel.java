@@ -151,14 +151,21 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
         res.add(matchesTitle, BorderLayout.NORTH);
 
-        JPanel btnPanel = new JPanel(new BorderLayout());
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnPanel.add(analyzeButton, BorderLayout.WEST);
 
-        JPanel resultPanel = new JPanel();
-        resultPanel.add(new JLabel("RRR"));
+        JLabel legend = new JBLableHyprlink("" +
+                "<html><body>" +
+                "<div style=\"padding: 10px; background: " + ColorUtil.toHtmlColor(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()) + "\">" +
+                "<span style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor()) + "\">***</span> - matched part of the regex" +
+                "<br>" +
+                "<br>" +
+                "<a href=\"clear\">clear</a>" +
+                "</div>" +
+                "</body></html>", e -> matchingProcessor.clearAnalyzeResult());
 
         analyzePanel.add(btnPanel, CARD_AN_BUTTON);
-        analyzePanel.add(resultPanel, CARD_AN_RESULTS);
+        analyzePanel.add(legend, CARD_AN_RESULTS);
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(JBUI.Borders.emptyTop(15));

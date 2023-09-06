@@ -303,4 +303,12 @@ public class MatchingProcessor implements Disposable {
         
         return analyzeTask.first;
     }
+
+    public void clearAnalyzeResult() {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+
+        analyzeTask = null;
+        
+        notifyAnalyzingStateListeners();
+    }
 }
