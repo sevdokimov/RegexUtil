@@ -15,10 +15,7 @@ import com.intellij.openapi.editor.event.CaretEvent;
 import com.intellij.openapi.editor.event.CaretListener;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.editor.markup.HighlighterLayer;
-import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.RangeHighlighter;
-import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -76,6 +73,10 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
     private static final TextAttributes MATCHED_REGEXP_2 = MATCHED_REGEXP;
 
     private static final TextAttributes MATCHED_TEXT = MATCHED_REGEXP;
+
+    public static final TextAttributes BLOCKER = new TextAttributes(null,
+            new JBColor(new Color(0xFFD0D0), new Color(0x482222)),
+            JBColor.RED, EffectType.BOXED, 0);
 
     private final Project project;
     final Editor textEditor;
@@ -227,6 +228,8 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
             highlight(regexEditor, anResult.getMatchedRegexp(), MATCHED_REGEXP);
 
             highlight(regexEditor, anResult.getAdditionalMatchedRegexp(), MATCHED_REGEXP_2);
+
+            highlight(regexEditor, anResult.getBlockers(), BLOCKER);
         }
 
         if (anResult.getMatchedText() != null) {

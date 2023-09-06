@@ -13,6 +13,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import org.intellij.lang.regexp.RegExpLanguage;
 import org.intellij.lang.regexp.psi.RegExpBranch;
+import org.intellij.lang.regexp.psi.RegExpGroup;
 import org.intellij.lang.regexp.psi.RegExpPattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +33,8 @@ public class RegexpAnalyzer extends Task.Backgroundable {
 
     private List<TextRange> matchedRegexp;
     private List<TextRange> additionalMatchedRegexp;
+
+    private List<TextRange> blockers;
 
     private TextRange matchedText;
 
@@ -62,6 +65,11 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         return matchedRegexp;
     }
 
+    public List<TextRange> getBlockers() {
+        assert success;
+        return blockers;
+    }
+
     public List<TextRange> getAdditionalMatchedRegexp() {
         assert success;
         return additionalMatchedRegexp;
@@ -83,35 +91,17 @@ public class RegexpAnalyzer extends Task.Backgroundable {
             int matchedItemsCount = pair.first;
 
             matchedRegexp = new ArrayList<>();
+            blockers = new ArrayList<>();
+            additionalMatchedRegexp = new ArrayList<>();
 
-            if (matchedItemsCount == 0) {
-                additionalMatchedRegexp = List.of();
-            } else {
+            if (matchedItemsCount > 0) {
                 matchedRegexp.add(new TextRange(0, items.get(matchedItemsCount - 1).range.getEndOffset()));
-                additionalMatchedRegexp = List.of();
                 matchedText = pair.second;
             }
 
             if (matchedItemsCount < items.size()) {
-                List<List<Item>> unmatchedVariants = ReadAction.compute(() -> {
-                    Item unmatched = items.get(matchedItemsCount);
-
-                    if (unmatched.element instanceof RegExpPattern) {
-                        RegExpBranch[] branches = ((RegExpPattern) unmatched.element).getBranches();
-
-                        List<List<Item>> res = new ArrayList<>();
-
-                        for (RegExpBranch branch : branches) {
-                            List<Item> items = new ArrayList<>();
-                            parseRegexp(branch, items);
-                            res.add(items);
-                        }
-
-                        return res;
-                    }
-
-                    return null;
-                });
+                Item blocker = items.get(matchedItemsCount);
+                analyzeBlocker(state.getRegexp().substring(0, blocker.range.getStartOffset()), blocker, indicator);
             }
 
             success = true;
@@ -123,6 +113,59 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         }
     }
 
+    private List<List<Item>> extractBranches(PsiElement element) {
+        if (element instanceof RegExpPattern) {
+            RegExpBranch[] branches = ((RegExpPattern) element).getBranches();
+
+            List<List<Item>> res = new ArrayList<>();
+
+            for (RegExpBranch branch : branches) {
+                List<Item> items = new ArrayList<>();
+                parseRegexp(branch, items);
+                res.add(items);
+            }
+
+            return res;
+        } else if (element instanceof RegExpGroup) {
+            RegExpGroup g = (RegExpGroup) element;
+            return extractBranches(g.getPattern());
+        } else {
+            return List.of();
+        }
+    }
+
+    private void analyzeBlocker(String prefix, Item blocker, @NotNull ProgressIndicator indicator) {
+        List<List<Item>> unmatchedVariants = ReadAction.compute(() -> extractBranches(blocker.element));
+
+        if (unmatchedVariants.isEmpty()) {
+            blockers.add(blocker.range);
+            return;
+        }
+
+        for (List<Item> items : unmatchedVariants) {
+            Pair<Integer, TextRange> pair = findMaxMatchedPart(indicator, prefix, items);
+
+            int matchedItemsCount = pair.first;
+
+            String newPrefix;
+
+            if (matchedItemsCount > 0) {
+                TextRange matchedRange = new TextRange(items.get(0).range.getStartOffset(), items.get(matchedItemsCount - 1).range.getEndOffset());
+                additionalMatchedRegexp.add(matchedRange);
+                newPrefix = matchedRange.substring(state.getRegexp());
+            } else {
+                newPrefix = prefix;
+            }
+
+            if (matchedItemsCount < items.size()) {
+                analyzeBlocker(newPrefix, items.get(matchedItemsCount), indicator);
+            }
+        }
+    }
+
+    /**
+     * @return A pair of an item index + matched text
+     */
     private Pair<Integer, TextRange> findMaxMatchedPart(ProgressIndicator progress, String prefix, List<Item> items) throws ProcessCanceledException {
         if (items.size() == 0)
             return Pair.create(0, null);
