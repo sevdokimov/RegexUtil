@@ -31,7 +31,7 @@ public class RegexpAnalyzerTest extends MyBasePlatformTestCase {
     }
 
     private void doTest(@Language("RegExp") String regexp, String text, String expectedMatchedRegexp, String matchedText, String ... secondaryRegexp) {
-        doTest(regexp, text, expectedMatchedRegexp, matchedText, null, new String[0]);
+        doTest(regexp, text, expectedMatchedRegexp, matchedText, null, secondaryRegexp);
     }
 
     private void doTest(@Language("RegExp") String regexp, String text, String expectedMatchedRegexp, String matchedText, @Nullable List<String> blockers, String ... secondaryRegexp) {
