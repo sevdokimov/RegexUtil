@@ -3,6 +3,8 @@ package com.ess.regexutil.ideaplugin;
 import com.ess.regexutil.ideaplugin.utils.HoverEditorListener;
 import com.ess.regexutil.ideaplugin.utils.JBLableHyprlink;
 import com.intellij.execution.impl.EditorHyperlinkSupport;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
@@ -31,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -39,6 +42,8 @@ import java.util.regex.PatternSyntaxException;
 public class MatchingResultPanel extends JPanel implements Disposable {
 
     public static final int INVALID_REPLACEMENT = -1000;
+
+    private static final String DISABLE_RATE_PROP = "regextester2917.rate";
 
     public static final String CARD_PROGRESS = "progress";
     public static final String CARD_EMPTY = "empty";
@@ -85,6 +90,10 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             textSelection.accept(result.getOccurrences().get(occurrenceIdx));
         }
     });
+
+    final JBLableHyprlink rateLabel = new JBLableHyprlink("<a href=\"rate\">Rate the plugin in the Marketplace</a>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+            "<a href=\"no\">No, thanks</a><br><br>", e -> rate(e.getDescription()));
 
     Editor groupEditor;
     final Editor replacedEditor;
@@ -138,7 +147,22 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
         RegexpAnalyzer anResult = matchingProcessor.getAnalyzingResult();
 
-        ((CardLayout) analyzePanel.getLayout()).show(analyzePanel, anResult == null ? CARD_AN_BUTTON : CARD_AN_RESULTS);
+        String card;
+
+        if (anResult != null) {
+            if (!rateLabel.isVisible()
+                    && PropertiesComponent.getInstance().getValue(DISABLE_RATE_PROP) == null
+                    && anResult.isFinished() && anResult.getMatchedRegexp().size() > 0 && anResult.getBlockers().size() > 0) {
+                if (new Random().nextInt(5) == 0)
+                    rateLabel.setVisible(true);
+            }
+
+            card = CARD_AN_RESULTS;
+        } else {
+            card = CARD_AN_BUTTON;
+        }
+
+        ((CardLayout) analyzePanel.getLayout()).show(analyzePanel, card);
     }
 
     private static Border subpanelBorder() {
@@ -159,7 +183,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
                 "<div style=\"padding: 5px; background: " + ColorUtil.toHtmlColor(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()) + "\">" +
 
-                "<table cellpadding=\"0\" cellspacing=\"5\">" +
+                "<table cellpadding=\"0\" cellspacing=\"7\">" +
                 "  <tr>" +
                 "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor())
                 +       "; text-decoration: underline " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getEffectColor()) + "\">***</td>" +
@@ -184,7 +208,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(JBUI.Borders.emptyTop(15));
         bottomPanel.add(analyzePanel, BorderLayout.NORTH);
-
+        bottomPanel.add(rateLabel, BorderLayout.SOUTH);
+        rateLabel.setVisible(false);
+        
         res.add(bottomPanel, BorderLayout.CENTER);
 
         analyzeButton.addActionListener(e -> matchingProcessor.findUnmatched());
@@ -508,6 +534,14 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     public void setTextSelection(Consumer<Segment> textSelection) {
         this.textSelection = textSelection;
+    }
+
+    private void rate(@NotNull String button) {
+        PropertiesComponent.getInstance().setValue(DISABLE_RATE_PROP, button);
+        rateLabel.setVisible(false);
+
+        if (button.equals("rate"))
+            BrowserUtil.browse("https://plugins.jetbrains.com/plugin/2917-regexp-tester/reviews");
     }
 
     static String renderError(Exception ex) {

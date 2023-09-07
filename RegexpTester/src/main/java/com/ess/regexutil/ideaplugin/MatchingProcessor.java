@@ -256,6 +256,10 @@ public class MatchingProcessor implements Disposable {
             return;
 
         disposed = true;
+
+        Future<?> future = matchingFuture;
+        if (future != null)
+            future.cancel(true);
     }
 
     public void findUnmatched() {
