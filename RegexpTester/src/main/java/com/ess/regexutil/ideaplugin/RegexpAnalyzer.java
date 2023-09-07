@@ -7,7 +7,9 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.Trinity;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
@@ -15,6 +17,7 @@ import org.intellij.lang.regexp.RegExpLanguage;
 import org.intellij.lang.regexp.psi.RegExpBranch;
 import org.intellij.lang.regexp.psi.RegExpGroup;
 import org.intellij.lang.regexp.psi.RegExpPattern;
+import org.intellij.lang.regexp.psi.RegExpRecursiveElementVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,7 +104,18 @@ public class RegexpAnalyzer extends Task.Backgroundable {
 
             if (matchedItemsCount < items.size()) {
                 Item blocker = items.get(matchedItemsCount);
-                analyzeBlocker(state.getRegexp().substring(0, blocker.range.getStartOffset()), blocker, indicator);
+
+                List<TextRange> optionalMatchedRegexStack = new ArrayList<>();
+                Ref<Trinity<List<TextRange>, TextRange, Integer>> maxMatched = new Ref<>();
+
+                analyzeBlocker(state.getRegexp().substring(0, blocker.range.getStartOffset()), 0, blocker, indicator, optionalMatchedRegexStack, maxMatched);
+
+                if (maxMatched.get() != null) {
+                    matchedText = maxMatched.get().second;
+                    List<TextRange> regexpParts = maxMatched.get().first;
+                    additionalMatchedRegexp.removeAll(regexpParts);
+                    matchedRegexp.addAll(regexpParts);
+                }
             }
 
             success = true;
@@ -134,7 +148,10 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         }
     }
 
-    private void analyzeBlocker(String prefix, Item blocker, @NotNull ProgressIndicator indicator) {
+    private void analyzeBlocker(String prefix, int prefixWeight, Item blocker, @NotNull ProgressIndicator indicator,
+                                List<TextRange> optionalMatchedRegexStack,
+                                Ref<Trinity<List<TextRange>, TextRange, Integer>> maxMatched) {
+
         List<List<Item>> unmatchedVariants = ReadAction.compute(() -> extractBranches(blocker.element));
 
         if (unmatchedVariants.isEmpty()) {
@@ -147,20 +164,45 @@ public class RegexpAnalyzer extends Task.Backgroundable {
 
             int matchedItemsCount = pair.first;
 
-            String newPrefix;
-
             if (matchedItemsCount > 0) {
                 TextRange matchedRange = new TextRange(items.get(0).range.getStartOffset(), items.get(matchedItemsCount - 1).range.getEndOffset());
                 additionalMatchedRegexp.add(matchedRange);
-                newPrefix = matchedRange.substring(state.getRegexp());
-            } else {
-                newPrefix = prefix;
-            }
 
-            if (matchedItemsCount < items.size()) {
-                analyzeBlocker(newPrefix, items.get(matchedItemsCount), indicator);
+                optionalMatchedRegexStack.add(matchedRange);
+
+                TextRange matchedTextRange = pair.second;
+
+                int weight = prefixWeight;
+                for (int i = 0; i < matchedItemsCount; i++) {
+                    weight += items.get(i).weight;
+                }
+
+                if (hasMorePriority(maxMatched.get(), weight, matchedTextRange))
+                    maxMatched.set(Trinity.create(new ArrayList<>(optionalMatchedRegexStack), matchedTextRange, weight));
+
+                if (matchedItemsCount < items.size()) {
+                    String newPrefix = matchedRange.substring(state.getRegexp());
+                    analyzeBlocker(newPrefix, weight, items.get(matchedItemsCount), indicator, optionalMatchedRegexStack, maxMatched);
+                }
+
+                optionalMatchedRegexStack.remove(optionalMatchedRegexStack.size() - 1);
+            } else {
+                if (matchedItemsCount < items.size()) {
+                    analyzeBlocker(prefix, prefixWeight, items.get(matchedItemsCount), indicator, optionalMatchedRegexStack, maxMatched);
+                }
             }
         }
+    }
+
+    private static boolean hasMorePriority(@Nullable Trinity<List<TextRange>, TextRange, Integer> maxMatched,
+                                           int newWeight, @NotNull TextRange newTextRange) {
+        if (maxMatched == null)
+            return true;
+
+        if (maxMatched.third < newWeight)
+            return true;
+
+        return maxMatched.third == newWeight && maxMatched.second.getLength() < newTextRange.getLength();
     }
 
     /**
@@ -201,7 +243,7 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         });
     }
 
-    private List<Item> parseRegexp() {
+    List<Item> parseRegexp() {
         return ReadAction.compute(() -> {
             List<Item> res = new ArrayList<>();
 
@@ -236,18 +278,31 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         }
     }
 
-    private static class Item {
+    static class Item {
         private final TextRange range;
 
         private final PsiElement element;
 
+        final int weight;
+
         public Item(PsiElement element) {
             this.element = element;
             this.range = element.getTextRange();
-        }
 
-        public TextRange getRange() {
-            return range;
+            Weigher weigher = new Weigher();
+            element.accept(weigher);
+
+            weight = weigher.weight;
+        }
+    }
+
+    private static class Weigher extends RegExpRecursiveElementVisitor {
+        int weight;
+
+        @Override
+        public void visitElement(@NotNull PsiElement element) {
+            super.visitElement(element);
+            weight++;
         }
     }
 }
