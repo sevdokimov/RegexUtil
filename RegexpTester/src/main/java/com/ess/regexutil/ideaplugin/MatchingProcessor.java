@@ -291,7 +291,7 @@ public class MatchingProcessor implements Disposable {
     public boolean isAnalyzingInProgress() {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        return analyzeTask != null && analyzeTask.first.isFinished();
+        return analyzeTask != null && !analyzeTask.first.isFinished();
     }
 
     @Nullable

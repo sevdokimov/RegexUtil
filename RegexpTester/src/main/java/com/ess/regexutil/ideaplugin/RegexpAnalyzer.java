@@ -141,6 +141,12 @@ public class RegexpAnalyzer extends Task.Backgroundable {
             return extractBranches(((RegExpClosure) element).getAtom());
         } else if (element instanceof RegExpGroup) {
             RegExpGroup g = (RegExpGroup) element;
+            RegExpGroup.Type type = g.getType();
+            if (type == RegExpGroup.Type.NEGATIVE_LOOKAHEAD || type == RegExpGroup.Type.NEGATIVE_LOOKBEHIND
+                    || type == RegExpGroup.Type.POSITIVE_LOOKAHEAD || type == RegExpGroup.Type.POSITIVE_LOOKBEHIND) {
+                return List.of();
+            }
+
             return extractBranches(g.getPattern());
         } else {
             return List.of();

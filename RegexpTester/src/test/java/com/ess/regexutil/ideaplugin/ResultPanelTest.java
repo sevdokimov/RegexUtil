@@ -268,7 +268,7 @@ public class ResultPanelTest extends RegexPanelTestBase {
         });
 
         edt(() -> {
-            assert !panel.resultsPanel.analyzeButton.isEnabled();
+            assert panel.resultsPanel.analyzeButton.isEnabled();
         });
     }
 
