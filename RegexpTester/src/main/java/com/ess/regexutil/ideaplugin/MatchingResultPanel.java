@@ -161,12 +161,17 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
                 "<table cellpadding=\"0\" cellspacing=\"5\">" +
                 "  <tr>" +
-                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor()) + "\">***</td>" +
-                "    <td> - matched part of the regex</td>" +
+                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor())
+                +       "; text-decoration: underline " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getEffectColor()) + "\">***</td>" +
+                "    <td> - regexp parts matched to the highlighted text</td>" +
+                "  </tr>" +
+                "  <tr>" +
+                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor())+ "\">***</td>" +
+                "    <td> - regexp branches that can be matched</td>" +
                 "  </tr>" +
                 "  <tr>" +
                 "    <td style=\"border: 1px solid " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getEffectColor()) + "; background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getBackgroundColor()) + "\">***</td>" +
-                "    <td> - blocker</td>" +
+                "    <td> - blockers</td>" +
                 "  </tr>" +
                 "</table>" +
                 "<a href=\"clear\">clear</a>" +
