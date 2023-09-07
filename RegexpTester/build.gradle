@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.ess'
-version '2.1.0'
+version '2.2.0'
 
 repositories {
     mavenCentral()
@@ -35,7 +35,10 @@ patchPluginXml {
     untilBuild = ""
 
     changeNotes = """
-Add "Replace" mode allowing replace substrings matches a pattern.
+<ul>
+<li>Add "Find Unmatched Part" button to analyze an unmatched regexp</li>
+<li>Correct termination of the matching process when the matching process takes too much time</li>
+</ul> 
 """
 }
 

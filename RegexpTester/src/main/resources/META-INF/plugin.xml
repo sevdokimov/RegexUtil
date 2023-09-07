@@ -6,10 +6,12 @@
 
     <description><![CDATA[
     Regular Expression tester.<br>
-    Helps to experiment with Java regular expressions. Highlights matched text, shows detailed information about matched groups.
+    Helps to experiment with Java regular expressions. Highlights matched text, shows detailed information about matched groups.<br>
+    <br>
+    Can highlight the problematic part of an unmatched regex.
     <br><br>
     An online version of the regexp tester is available on <a href="https://myregexp.com">https://myregexp.com</a>
-
+    <br><br>
   ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
