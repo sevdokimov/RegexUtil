@@ -255,11 +255,28 @@ public class ResultPanelTest extends RegexPanelTestBase {
         });
     }
 
+    public void testAnalyzingButton() {
+        init("\\d+!", " 2023 ");
+
+        edt(() -> {
+            click(panel.resultsPanel.analyzeButton);
+            assert !panel.resultsPanel.analyzeButton.isEnabled();
+        });
+
+        waitFor(() -> {
+            return Stream.of(panel.textEditor.getMarkupModel().getAllHighlighters()).anyMatch(h -> h.getUserData(RegexpTesterPanel.MATCHED_PARTS));
+        });
+
+        edt(() -> {
+            assert panel.resultsPanel.analyzeButton.isEnabled();
+        });
+    }
+
     public void testReplaceError() {
         init("\\d+", " 2023 | +04 | -02");
 
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("a\\");
         });
 
@@ -276,7 +293,7 @@ public class ResultPanelTest extends RegexPanelTestBase {
         init("\\d+", " 2023 | +04 | -02");
 
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("a$9");
         });
 
@@ -293,7 +310,7 @@ public class ResultPanelTest extends RegexPanelTestBase {
         init("\\d+", " 2023 | +04 | -02");
 
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("a${aaa}");
         });
 
@@ -310,7 +327,7 @@ public class ResultPanelTest extends RegexPanelTestBase {
         init("([+\\-])?\\d+", " 2023 | +04 | -02");
 
         edt(() -> {
-            panel.matchTypeCombobox.setItem(RegexpTesterPanel.MatchType.REPLACE);
+            panel.matchTypeCombobox.setItem(MatchType.REPLACE);
             panel.replacementInput.setText("($1)");
         });
 

@@ -21,6 +21,6 @@ public abstract class MyBasePlatformTestCase extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        RegexpTesterPanel.REHIGHLIGHT_DELAY = 0;
+        MatchingProcessor.REHIGHLIGHT_DELAY = 0;
     }
 }

@@ -21,9 +21,12 @@ import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mockito.Mockito;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Comparator;
@@ -108,7 +111,7 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
     }
 
     protected void waitForResults() {
-        waitFor(() -> panel.isResultReady());
+        waitFor(() -> panel.matchingProcessor.isResultReady());
     }
 
     protected static void waitFor(Callable<Boolean> condition) {
@@ -297,6 +300,14 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
             }
         } catch (MissingResourceException e) {
             run.run();
+        }
+    }
+
+    protected void click(JButton button) {
+        ActionEvent action = Mockito.mock(ActionEvent.class);
+
+        for (ActionListener actionListener : button.getActionListeners()) {
+            actionListener.actionPerformed(action);
         }
     }
 }

@@ -16,26 +16,24 @@ public class MatchResult {
 
     private Exception error;
 
-    private final RegexpTesterPanel.MatchType matchType;
     private final List<Occurrence> occurrences;
     private final List<Pair<TextRange, String>> groupPositions;
 
-    private final String text;
+    private final State state;
+
     private final String replaced;
 
-    public MatchResult(RegexpTesterPanel.MatchType matchType, String text, List<Occurrence> occurrences, List<Pair<TextRange, String>> groupPositions, String replaced) {
-        this.matchType = matchType;
-        this.text = text;
+    public MatchResult(State state, List<Occurrence> occurrences, String replaced) {
+        this.state = state;
         this.occurrences = occurrences;
-        this.groupPositions = groupPositions;
         this.replaced = replaced;
+        this.groupPositions = state.getGroupPositions();
     }
 
     public MatchResult(@NotNull Exception error) {
         this.error = error;
-        matchType = null;
+        state = null;
         occurrences = List.of();
-        text = "";
         groupPositions = List.of();
         replaced = null;
     }
@@ -53,8 +51,8 @@ public class MatchResult {
         return groupPositions;
     }
 
-    public RegexpTesterPanel.MatchType getMatchType() {
-        return matchType;
+    public MatchType getMatchType() {
+        return state == null ? null : state.getMatchType();
     }
 
     @NotNull
@@ -63,7 +61,7 @@ public class MatchResult {
     }
 
     public String getText() {
-        return text;
+        return state == null ? null : state.getText();
     }
 
     @Override
@@ -87,13 +85,10 @@ public class MatchResult {
             return true;
         }
 
-        if (!Objects.equals(text, that.text))
+        if (!Objects.equals(state, that.state))
             return false;
 
         if (!Objects.equals(replaced, that.replaced))
-            return false;
-
-        if (!Objects.equals(matchType, that.matchType))
             return false;
 
         if (!Objects.equals(occurrences, that.occurrences))
@@ -106,7 +101,7 @@ public class MatchResult {
     public int hashCode() {
         return Objects.hash(
                 error == null ? null : error.getMessage(),
-                matchType,
+                state,
                 occurrences
                 );
     }

@@ -3,6 +3,8 @@ package com.ess.regexutil.ideaplugin;
 import com.ess.regexutil.ideaplugin.utils.HoverEditorListener;
 import com.ess.regexutil.ideaplugin.utils.JBLableHyprlink;
 import com.intellij.execution.impl.EditorHyperlinkSupport;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
@@ -31,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -40,12 +43,17 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     public static final int INVALID_REPLACEMENT = -1000;
 
+    private static final String DISABLE_RATE_PROP = "regextester2917.rate";
+
     public static final String CARD_PROGRESS = "progress";
     public static final String CARD_EMPTY = "empty";
     public static final String CARD_ERROR = "error";
     public static final String CARD_MATCHES = "matches";
     public static final String CARD_GROUPS = "groups";
     public static final String CARD_REPLACED = "replaced";
+
+    public static final String CARD_AN_BUTTON = "button";
+    public static final String CARD_AN_RESULTS = "res";
 
     static final Key<Boolean> GROUP_TEXT = Key.create("MatchingResultPanel.GROUP_TEXT");
 
@@ -54,6 +62,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             EffectType.BOXED, 0);
 
     private static final TextAttributesKey REPLACED_ATTR_KEY = EditorColors.LIVE_TEMPLATE_ATTRIBUTES;
+
+    private final MatchingProcessor matchingProcessor;
 
     private String currentCard = CARD_EMPTY;
 
@@ -70,6 +80,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         UIUtil.applyStyle(UIUtil.ComponentStyle.LARGE, matchesTitle);
     }
 
+    final JButton analyzeButton = new JButton("Find Unmatched Part");
+    final JPanel analyzePanel = new JPanel(new CardLayout());
+
     final JBLableHyprlink groupTitle = new JBLableHyprlink("|", e -> {
         int occurrenceIdx = Integer.parseInt(e.getDescription());
         if (result != null && occurrenceIdx < result.getOccurrences().size()) {
@@ -78,15 +91,20 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         }
     });
 
+    final JBLableHyprlink rateLabel = new JBLableHyprlink("<a href=\"rate\">Rate the plugin in the Marketplace</a>" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+            "<a href=\"no\">No, thanks</a><br><br>", e -> rate(e.getDescription()));
+
     Editor groupEditor;
     final Editor replacedEditor;
     private int selectedOccurrence;
 
-    public MatchingResultPanel(@NotNull Project project, IntConsumer errorClickListener) {
+    public MatchingResultPanel(@NotNull Project project, IntConsumer errorClickListener, MatchingProcessor matchingProcessor) {
         super(new CardLayout());
 
-        JPanel emptyPanel = new JPanel();
-        add(emptyPanel, CARD_EMPTY);
+        this.matchingProcessor = matchingProcessor;
+
+        add(new JPanel(), CARD_EMPTY);
 
         JBLabel matching = new JBLabel("Matching...");
         matching.setBorder(subpanelBorder());
@@ -119,6 +137,32 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         replacedEditor = createEditor(project);
         replacedEditor.getSettings().setUseSoftWraps(false);
         add(replacedEditor.getComponent(), CARD_REPLACED);
+
+        matchingProcessor.addAnalyzingListener(this::onAnalyzingStateChanged);
+    }
+
+    private void onAnalyzingStateChanged() {
+        analyzeButton.setEnabled(!matchingProcessor.isAnalyzingInProgress());
+        analyzeButton.setVisible(matchingProcessor.isResultReady() && result.getOccurrences().isEmpty());
+
+        RegexpAnalyzer anResult = matchingProcessor.getAnalyzingResult();
+
+        String card;
+
+        if (anResult != null) {
+            if (!rateLabel.isVisible()
+                    && PropertiesComponent.getInstance().getValue(DISABLE_RATE_PROP) == null
+                    && anResult.isFinished() && anResult.getMatchedRegexp().size() > 0 && anResult.getBlockers().size() > 0) {
+                if (new Random().nextInt(5) == 0)
+                    rateLabel.setVisible(true);
+            }
+
+            card = CARD_AN_RESULTS;
+        } else {
+            card = CARD_AN_BUTTON;
+        }
+
+        ((CardLayout) analyzePanel.getLayout()).show(analyzePanel, card);
     }
 
     private static Border subpanelBorder() {
@@ -129,7 +173,47 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         JPanel res = new JPanel(new BorderLayout());
         res.setBorder(subpanelBorder());
 
-        res.add(matchesTitle, BorderLayout.PAGE_START);
+        res.add(matchesTitle, BorderLayout.NORTH);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        btnPanel.add(analyzeButton, BorderLayout.WEST);
+
+        JLabel legend = new JBLableHyprlink("" +
+                "<html><body>" +
+
+                "<div style=\"padding: 5px; background: " + ColorUtil.toHtmlColor(EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()) + "\">" +
+
+                "<table cellpadding=\"0\" cellspacing=\"7\">" +
+                "  <tr>" +
+                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor())
+                +       "; text-decoration: underline " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getEffectColor()) + "\">***</td>" +
+                "    <td> - regexp parts matched to the highlighted text</td>" +
+                "  </tr>" +
+                "  <tr>" +
+                "    <td style=\"background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.MATCHED_REGEXP.getBackgroundColor())+ "\">***</td>" +
+                "    <td> - regexp branches that can be matched</td>" +
+                "  </tr>" +
+                "  <tr>" +
+                "    <td style=\"border: 1px solid " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getEffectColor()) + "; background: " + ColorUtil.toHtmlColor(RegexpTesterPanel.BLOCKER.getBackgroundColor()) + "\">***</td>" +
+                "    <td> - blockers</td>" +
+                "  </tr>" +
+                "</table>" +
+                "<a href=\"clear\">clear</a>" +
+                "</div>" +
+                "</body></html>", e -> matchingProcessor.clearAnalyzeResult());
+
+        analyzePanel.add(btnPanel, CARD_AN_BUTTON);
+        analyzePanel.add(legend, CARD_AN_RESULTS);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(JBUI.Borders.emptyTop(15));
+        bottomPanel.add(analyzePanel, BorderLayout.NORTH);
+        bottomPanel.add(rateLabel, BorderLayout.SOUTH);
+        rateLabel.setVisible(false);
+        
+        res.add(bottomPanel, BorderLayout.CENTER);
+
+        analyzeButton.addActionListener(e -> matchingProcessor.findUnmatched());
 
         return res;
     }
@@ -231,7 +315,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             return;
         }
 
-        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE) {
+        if (result.getMatchType() == MatchType.REPLACE) {
             showReplacedText();
 
             select(CARD_REPLACED);
@@ -239,9 +323,9 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         }
 
         if (result.getOccurrences().isEmpty()) {
-            matchesTitle.setText("no match");
+            matchesTitle.setText("<html><body><b>&nbsp;no match</b></body></html>");
         } else {
-            if (result.getMatchType() == RegexpTesterPanel.MatchType.ENTIRE_STRING || result.getMatchType() == RegexpTesterPanel.MatchType.BEGINNING) {
+            if (result.getMatchType() == MatchType.ENTIRE_STRING || result.getMatchType() == MatchType.BEGINNING) {
                 assert result.getOccurrences().size() == 1;
                 matchesTitle.setText("match");
             } else {
@@ -252,6 +336,8 @@ public class MatchingResultPanel extends JPanel implements Disposable {
             }
         }
 
+        onAnalyzingStateChanged();
+
         if (result.getOccurrences().size() == 1) {
             selectOccurrence(0);
         } else {
@@ -260,7 +346,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     private void showReplacedText() {
-        assert result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE;
+        assert result.getMatchType() == MatchType.REPLACE;
         assert result.getReplaced() != null;
 
         replacedEditor.getMarkupModel().removeAllHighlighters();
@@ -302,7 +388,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     public void selectOccurrence(int occurrenceIdx) {
-        if (result.getMatchType() == RegexpTesterPanel.MatchType.REPLACE)
+        if (result.getMatchType() == MatchType.REPLACE)
             return;
 
         if (selectedOccurrence == occurrenceIdx)
@@ -448,6 +534,14 @@ public class MatchingResultPanel extends JPanel implements Disposable {
 
     public void setTextSelection(Consumer<Segment> textSelection) {
         this.textSelection = textSelection;
+    }
+
+    private void rate(@NotNull String button) {
+        PropertiesComponent.getInstance().setValue(DISABLE_RATE_PROP, button);
+        rateLabel.setVisible(false);
+
+        if (button.equals("rate"))
+            BrowserUtil.browse("https://plugins.jetbrains.com/plugin/2917-regexp-tester/reviews");
     }
 
     static String renderError(Exception ex) {
