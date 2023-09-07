@@ -78,6 +78,26 @@ public class RegexpAnalyzerTest extends MyBasePlatformTestCase {
 //        doTest("#1+!|a(b(c!))", "aaaaaaaa  #11111111 abc", "abc", "abc", List.of("!", "!"), "1+");
     }
 
+    public void testMatchFromBegin1() {
+        State state = new State("\\d+", "343", "", 0, MatchType.ENTIRE_STRING, List.of());
+
+        RegexpAnalyzer analyzer = new RegexpAnalyzer(getProject(), state, null);
+
+        analyzer.run(new EmptyProgressIndicator());
+        assertEquals("343", analyzer.getMatchedText().substring(state.getText()));
+    }
+
+    public void testMatchFromBegin2() {
+        State state = new State("\\d+", "__343", "", 0, MatchType.ENTIRE_STRING, List.of());
+
+        RegexpAnalyzer analyzer = new RegexpAnalyzer(getProject(), state, null);
+
+        analyzer.run(new EmptyProgressIndicator());
+        assertNull(analyzer.getMatchedText());
+
+        assertThat(analyzer.getMatchedRegexp()).isEmpty();
+    }
+
     public void testBranchWeigher() {
         assertThat(getBranchWeight("a")).isEqualTo(1);
         assertThat(getBranchWeight("abc")).isEqualTo(3);

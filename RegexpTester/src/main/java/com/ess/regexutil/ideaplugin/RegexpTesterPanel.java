@@ -242,6 +242,16 @@ public class RegexpTesterPanel extends SimpleToolWindowPanel implements Disposab
                     MATCHED_TEXT, HighlighterTargetArea.EXACT_RANGE);
 
             highlighter.putUserData(MATCHED_PARTS, true);
+        } else {
+            if (anResult.matchFromBegin() && anResult.getMatchedRegexp().isEmpty() && anResult.getAdditionalMatchedRegexp().isEmpty()) {
+                if (textEditor.getDocument().getTextLength() > 0) {
+                    RangeHighlighter highlighter = textEditor.getMarkupModel().addRangeHighlighter(
+                            0, 1, HighlighterLayer.ELEMENT_UNDER_CARET,
+                            BLOCKER, HighlighterTargetArea.EXACT_RANGE);
+
+                    highlighter.putUserData(MATCHED_PARTS, true);
+                }
+            }
         }
     }
 

@@ -29,8 +29,6 @@ public class RegexpAnalyzer extends Task.Backgroundable {
 
     private final Runnable onDone;
 
-    private List<Item> items;
-
     private List<TextRange> matchedRegexp;
     private List<TextRange> additionalMatchedRegexp;
 
@@ -84,7 +82,7 @@ public class RegexpAnalyzer extends Task.Backgroundable {
     @Override
     public void run(@NotNull ProgressIndicator indicator) {
         try {
-            items = parseRegexp();
+            List<Item> items = parseRegexp();
 
             Pair<Integer, TextRange> pair = findMaxMatchedPart(indicator, "", items);
 
@@ -210,6 +208,10 @@ public class RegexpAnalyzer extends Task.Backgroundable {
         return maxMatched.third == newWeight && maxMatched.second.getLength() < newTextRange.getLength();
     }
 
+    public boolean matchFromBegin() {
+        return state.getMatchType() == MatchType.ENTIRE_STRING || state.getMatchType() == MatchType.BEGINNING;
+    }
+
     /**
      * @return A pair of an item index + matched text
      */
@@ -236,7 +238,7 @@ public class RegexpAnalyzer extends Task.Backgroundable {
                 Pattern pattern = Pattern.compile(regexpBuilder.toString(), state.getFlags());
                 Matcher matcher = pattern.matcher(state.getText());
 
-                if (matcher.find()) {
+                if (matchFromBegin() ? matcher.lookingAt() : matcher.find()) {
                     foundText = new TextRange(matcher.start(), matcher.end());
                     begin = middle + 1;
                 } else {
