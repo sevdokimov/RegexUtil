@@ -31,6 +31,29 @@ public class RegexpAnalyzerTest extends MyBasePlatformTestCase {
         doTest("\\d(?:$| )", " 44", "\\d(?:$| )", "4", List.of());
         doTest("\\d(?:$| )", " 44!!!", "\\d", "4", List.of("$", " "));
         doTest("\\b\\d+\\b", " 44x!!! 5555x ", "\\b\\d+", "44", List.of("\\b"));
+
+        doTest("\\b\\d+(\\.\\d+)+\\b", " 44x!!! 5555x ", "\\b\\d+", "44", List.of("\\."));
+        doTest("\\b\\d+(\\.\\d+)+\\b", " 44.x", "\\b\\d+\\.", "44.", List.of("\\d+"));
+        doTest("\\b\\d+(?<xx>\\.\\d+)+\\b", " 44.x", "\\b\\d+\\.", "44.", List.of("\\d+"));
+
+        doTest("\\b\\d+(\\.\\d+){2,}\\b", " 44.222!!! 5555x ", "\\b\\d+\\.\\d+", "44.222", List.of()); // todo
+        doTest("\\b\\d+(\\.\\d+){2,}\\b", " 44.2.!!! 5555x ", "\\b\\d+\\.\\d+", "44.2", List.of());
+
+        doTest("\\b\\d+(\\.\\d+)?\\b", " 44x!!! 5555x ", "\\b\\d+(\\.\\d+)?", "44", List.of("\\b"));
+//        doTest("\\b\\d+(\\.\\d+)?\\b", " 44.x", "\\b\\d+\\.", "44.", List.of("\\b", "\\d+"), "\\.");
+        doTest("\\b\\d+(\\.\\d+)*\\b", " 44x!!! 5555x ", "\\b\\d+(\\.\\d+)*", "44", List.of("\\b"));
+        doTest("\\b\\d+(\\.\\d+)*?\\b", " 44x!!! 5555x ", "\\b\\d+(\\.\\d+)*?", "44", List.of("\\b"));
+//        doTest("xy+", " x!!", "x", "x", List.of("y"));
+
+        doTest("((a|e)|(y|(i)))|\\d+", " !", "", "", List.of("a", "e", "y", "i", "\\d+"));
+        doTest("((a|e)|(y|(i)))|\\d+", " i", "((a|e)|(y|(i)))|\\d+", "i", List.of());
+
+        doTest("_((?<a>a)(?<b>b))+", " _a", "_(?<a>a)", "_a", List.of("b"));
+        doTest("_((a)(bbb))+", " _a", "_(a)", "_a", List.of("b"));
+        doTest("_((?:(a))b)+", " _a", "_(?:(a))", "_a", List.of("b"));
+//        doTest("\\b\\d+(\\.\\d+)?(x!|y!)\\b", " 44x", "\\b\\d+(\\.\\d+)?x", "44x", List.of("!"));
+//        doTest("\\b\\d+(\\.\\d+)?((x)?!|y!)\\b", " 44x", "\\b\\d+(\\.\\d+)?x", "44x", List.of("!"));
+//        doTest("\\b\\d+(abcd!)?m\\b", " 44m 55abcd", "\\b\\d+", "44", List.of("\\b", "!"), "abcd");
     }
 
     public void testBranchPriority() {

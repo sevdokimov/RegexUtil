@@ -14,10 +14,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import org.intellij.lang.regexp.RegExpLanguage;
-import org.intellij.lang.regexp.psi.RegExpBranch;
-import org.intellij.lang.regexp.psi.RegExpGroup;
-import org.intellij.lang.regexp.psi.RegExpPattern;
-import org.intellij.lang.regexp.psi.RegExpRecursiveElementVisitor;
+import org.intellij.lang.regexp.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -140,6 +137,8 @@ public class RegexpAnalyzer extends Task.Backgroundable {
             }
 
             return res;
+        } else if (element instanceof RegExpClosure) {
+            return extractBranches(((RegExpClosure) element).getAtom());
         } else if (element instanceof RegExpGroup) {
             RegExpGroup g = (RegExpGroup) element;
             return extractBranches(g.getPattern());
