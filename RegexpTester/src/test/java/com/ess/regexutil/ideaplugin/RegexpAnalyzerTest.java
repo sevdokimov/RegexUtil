@@ -51,6 +51,10 @@ public class RegexpAnalyzerTest extends MyBasePlatformTestCase {
         doTest("_((?<a>a)(?<b>b))+", " _a", "_(?<a>a)", "_a", List.of("b"));
         doTest("_((a)(bbb))+", " _a", "_(a)", "_a", List.of("b"));
         doTest("_((?:(a))b)+", " _a", "_(?:(a))", "_a", List.of("b"));
+
+        doTest("(\\d+)-\\1", " 1  22 123-12", "(\\d+)-", "123-", List.of("\\1"));
+        doTest("_\\Qabc\\E_", " _abc", "_\\Qabc\\E", "_abc", List.of("_"));
+        doTest("_\\Qabc\\E_", " _ab", "_\\Qab", "_ab", List.of("c"));
 //        doTest("\\b\\d+(\\.\\d+)?(x!|y!)\\b", " 44x", "\\b\\d+(\\.\\d+)?x", "44x", List.of("!"));
 //        doTest("\\b\\d+(\\.\\d+)?((x)?!|y!)\\b", " 44x", "\\b\\d+(\\.\\d+)?x", "44x", List.of("!"));
 //        doTest("\\b\\d+(abcd!)?m\\b", " 44m 55abcd", "\\b\\d+", "44", List.of("\\b", "!"), "abcd");
