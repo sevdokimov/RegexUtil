@@ -304,7 +304,7 @@ public abstract class RegexPanelTestBase extends MyBasePlatformTestCase {
     }
 
     protected void click(JButton button) {
-        ActionEvent action = Mockito.mock(ActionEvent.class);
+        ActionEvent action = new ActionEvent(new Object(), 0, "X");
 
         for (ActionListener actionListener : button.getActionListeners()) {
             actionListener.actionPerformed(action);
