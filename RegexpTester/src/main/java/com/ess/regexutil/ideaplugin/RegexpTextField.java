@@ -12,6 +12,7 @@ import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.impl.source.resolve.FileContextUtil;
 import com.intellij.ui.LanguageTextField;
 import org.intellij.lang.regexp.RegExpLanguage;
+import org.intellij.lang.regexp.intention.CheckRegExpForm;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -36,7 +37,7 @@ public class RegexpTextField extends LanguageTextField {
         editor.setHorizontalScrollbarVisible(true);
         editor.setVerticalScrollbarVisible(true);
         editor.setBorder(Utils.createEditorBorder(true));
-        editor.putUserData(Utils.getCheckRegexpEditorKey(), true);
+        editor.putUserData(CheckRegExpForm.Keys.CHECK_REG_EXP_EDITOR, true);
 
         Color editorBackground = EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground();
         editor.setBackgroundColor(editorBackground);
