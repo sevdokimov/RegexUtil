@@ -1,5 +1,6 @@
 package com.ess.regexutil.ideaplugin;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -126,6 +127,11 @@ public class FlagPanelAction extends ComboBoxAction implements DumbAware {
             this.flags = flags;
             notifyFlagChanged();
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 
     public class FlagButton extends ComboBoxButton {
