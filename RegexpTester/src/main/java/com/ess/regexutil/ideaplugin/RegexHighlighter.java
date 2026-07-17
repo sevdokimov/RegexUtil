@@ -2,6 +2,7 @@ package com.ess.regexutil.ideaplugin;
 
 import com.ess.regexutil.ideaplugin.utils.Utils;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.CaretEvent;
 import com.intellij.openapi.editor.event.CaretListener;
@@ -10,6 +11,7 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Segment;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
@@ -161,14 +163,17 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
 
         int offset = editor.getCaretModel().getOffset();
 
-        RegExpFile file = (RegExpFile) PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
+        Pair<Integer, List<TextRange>> highlightInfo = ReadAction.compute(() -> {
+            RegExpFile file = (RegExpFile) PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
+            int groupIdx = groupAtCaret(file, offset);
+            return Pair.create(groupIdx, getHighlightRanges(file, offset, groupIdx >= 0));
+        });
 
-        int groupIdx = groupAtCaret(file, offset);
+        groupSelectListener.accept(highlightInfo.first);
+        applyHighlightRanges(highlightInfo.second);
+    }
 
-        groupSelectListener.accept(groupIdx);
-
-        List<TextRange> ranges = getHighlightRanges(file, offset, groupIdx >= 0);
-
+    private void applyHighlightRanges(@NotNull List<TextRange> ranges) {
         BitSet existHighlights = new BitSet(ranges.size());
 
         for (RangeHighlighter hlt : editor.getMarkupModel().getAllHighlighters()) {
@@ -198,7 +203,7 @@ public class RegexHighlighter implements FocusListener, CaretListener, DocumentL
         }
     }
 
-    private List<TextRange> getHighlightRanges(RegExpFile file, int caretOffset, boolean bracketHighlighted) {
+    private List<TextRange> getHighlightRanges(@NotNull RegExpFile file, int caretOffset, boolean bracketHighlighted) {
         PsiElement element = file.findElementAt(caretOffset);
         if (Utils.isLeafElementOfType(element, RegExpTT.UNION))
             return highlightUnion(element);
