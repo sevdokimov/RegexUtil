@@ -15,6 +15,7 @@ import com.intellij.openapi.editor.ex.RangeHighlighterEx;
 import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.Segment;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
@@ -507,17 +508,19 @@ public class MatchingResultPanel extends JPanel implements Disposable {
     }
 
     private void groupRegionHover(RangeHighlighterEx regionHlt, Boolean isMouseOn, int occurrenceIdx, int groupIdx) {
+        Ref<RangeHighlighterEx> groupTextHlt = new Ref<>();
         ((MarkupModelEx) groupEditor.getMarkupModel()).processRangeHighlightersOverlappingWith(regionHlt.getStartOffset(), regionHlt.getEndOffset(), h -> {
             if (h.getUserData(GROUP_TEXT) == null)
                 return true;
 
-            if (isMouseOn) {
-                h.setTextAttributes(CURRENT_GROUP_ATTR);
-            } else {
-                h.setTextAttributes(TextAttributes.ERASE_MARKER);
-            }
+            groupTextHlt.set(h);
             return false;
         });
+
+        RangeHighlighterEx hlt = groupTextHlt.get();
+        if (hlt != null) {
+            hlt.setTextAttributes(isMouseOn ? CURRENT_GROUP_ATTR : TextAttributes.ERASE_MARKER);
+        }
 
         if (hoverGroup != null) {
             hoverGroup.accept(occurrenceIdx, isMouseOn ? groupIdx : -1);
