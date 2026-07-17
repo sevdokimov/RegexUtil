@@ -17,12 +17,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Segment;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -560,7 +560,7 @@ public class MatchingResultPanel extends JPanel implements Disposable {
         }
 
         if (fc != null) {
-            errorText = "<span style=\"" + "color: #" + ColorUtil.toHex(fc) + "\">" + StringEscapeUtils.escapeHtml(errorText) + "</span>";
+            errorText = "<span style=\"" + "color: #" + ColorUtil.toHex(fc) + "\">" + StringUtil.escapeXmlEntities(errorText) + "</span>";
         }
 
         StringBuilder html = new StringBuilder();
