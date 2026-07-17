@@ -1,10 +1,10 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.10.5"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
 }
 
 group = "com.ess"
-version = "2.2.1"
+version = "2.2.2"
 
 repositories {
     mavenCentral()
@@ -17,7 +17,7 @@ repositories {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
     intellijPlatform {
-        intellijIdea("2025.3.1")
+        intellijIdea("2026.2")
         testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add necessary plugin dependencies for compilation here, example:
@@ -31,12 +31,12 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "253"
+            sinceBuild = "262"
         }
 
         changeNotes = """
 <ul>
-<li>Fixed compatibility with 2025.3.1</li>
+<li>Fixed compatibility with 2026.2</li>
 </ul> 
     """.trimIndent()
     }
